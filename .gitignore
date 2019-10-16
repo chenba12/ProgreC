@@ -1,0 +1,38 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**
+!**/src/test/**
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+src/main/resources/application.properties
+bin/main/application.properties
+src/main/resources/application.yml
+src/main/resources/progresee-f7511-firebase-adminsdk-u7kq9-9b82c82543.json
+src/main/resources/progresee-f7511-firebase-adminsdk-u7kq9-9b82c82543.json
