@@ -19,8 +19,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.google.api.core.SettableApiFuture;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
-import com.google.firebase.tasks.OnFailureListener;
-import com.google.firebase.tasks.OnSuccessListener;
 import com.progresee.app.beans.Classroom;
 import com.progresee.app.beans.Role;
 import com.progresee.app.beans.Task;
@@ -87,7 +85,7 @@ public class UserService {
 //		} catch (ExecutionException e) {
 //			e.printStackTrace();
 //		}
-//		return null;
+		return null;
 	}
 
 	public ResponseEntity<Object> getCurrentUser(String token) {
