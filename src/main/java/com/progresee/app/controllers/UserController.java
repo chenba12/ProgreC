@@ -53,7 +53,7 @@ public class UserController {
 
 	// http://localhost:5000/user/updateUser
 	@PutMapping("/updateUser")
-	public String updateUser(@RequestHeader("Authorization") String token, @RequestBody User user) {
+	public Map<String, Object> updateUser(@RequestHeader("Authorization") String token, @RequestBody User user) {
 		if (NullCheckerUtils.userNullChecker(user)) {
 			return service.updateUser(token, user);
 		}
@@ -79,14 +79,14 @@ public class UserController {
 	}
 
 	@PutMapping("/updateClassroom")
-	public String updateClassroom(@RequestHeader("Authorization") String token,
+	public Map<String, Object> updateClassroom(@RequestHeader("Authorization") String token,
 			@RequestParam String classroomId, @RequestParam String name) {
 		return service.updateClassroom(token, classroomId, name);
 
 	}
 
 	@DeleteMapping("/deleteClassroom")
-	public String deleteClassroom(@RequestHeader("Authorization") String token,
+	public Map<String, Object> deleteClassroom(@RequestHeader("Authorization") String token,
 			@RequestParam String classroomId) {
 		return service.deleteClassroom(token, classroomId);
 	}
@@ -99,15 +99,15 @@ public class UserController {
 
 	@PutMapping("/transferClassroom")
 	public Map<String, Object> transferClassroom(@RequestHeader("Authorization") String token,
-			@RequestParam String classroomId, @RequestParam String email) {
-		return service.transferClassroom(token, classroomId, email);
+			@RequestParam String classroomId, @RequestParam String newOwnerId) {
+		return service.transferClassroom(token, classroomId, newOwnerId);
 	}
 
 	// http://localhost:5000/user/addToClassroom
 	@PutMapping("addToClassroom")
 	public Map<String, Object> addToClassroom(@RequestHeader("Authorization") String token,
-			@RequestParam String userId, @RequestParam String classroomId) {
-		return service.addToClassroom(token, userId, classroomId);
+			@RequestParam String classroomId, @RequestParam String userId) {
+		return service.addToClassroom(token, classroomId, userId);
 	}
 
 	// http://localhost:5000/user/leaveClassroom
@@ -120,8 +120,8 @@ public class UserController {
 	// http://localhost:5000/user/removeUser
 	@PutMapping("removeUser")
 	public Map<String, Object> removeFromClassroom(@RequestHeader("Authorization") String token,
-			@RequestParam String userId, @RequestParam String classroomId) {
-		return service.removeFromClassroom(token, userId, classroomId);
+			@RequestParam String classroomId, @RequestParam String userId) {
+		return service.removeFromClassroom(token, classroomId, userId);
 	}
 
 }

@@ -152,7 +152,7 @@ public class UserServiceImpl implements UserService {
 		classroom.setOwner(owner);
 		classroom.setDateCreated(Calendar.getInstance().getTime());
 		classroom.getUserList().add(uid);
-		String classroomUid=UUID.randomUUID().toString();
+		String classroomUid = UUID.randomUUID().toString().replace("-", "");
 		classroom.setUid(classroomUid);
 		ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomUid).set(classroom);
 		try {
@@ -223,7 +223,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Map<String, Object> transferClassroom(String token, String newOwnerId, String classroomId) {
+	public Map<String, Object> transferClassroom(String token, String classroomId, String newOwnerId) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String email = (String) map.get("email");
@@ -235,9 +235,10 @@ public class UserServiceImpl implements UserService {
 			System.out.println("documentSnapshot ->" + documentSnapshot);
 			if (documentSnapshot.exists()) {
 				String owner = (String) documentSnapshot.get("owner");
+				String newOwnerEmail = findUserByUid(newOwnerId);
 				if (owner.equalsIgnoreCase(email)) {
 					ApiFuture<WriteResult> reference = firestore.collection("classrooms").document(classroomId)
-							.update("owner", email);
+							.update("owner", newOwnerEmail);
 					WriteResult fuReference = reference.get();
 					if (fuReference.getUpdateTime() != null) {
 						return ResponseUtils.generateSuccessString("transfer successfullz");
@@ -252,10 +253,10 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Map<String, Object> addToClassroom(String token, String userId, String classroomId) {
+	public Map<String, Object> addToClassroom(String token, String classroomId, String userId) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
-		ApiFuture<WriteResult> docRef = firestore.collection("classroom").document(classroomId).update("userList",
+		ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).update("userList",
 				FieldValue.arrayUnion(userId));
 		try {
 			WriteResult testedUpdateWriteResult = docRef.get();
@@ -277,7 +278,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			WriteResult testedUpdateWriteResult = docRef.get();
 			System.out.println("testedUpdateWriteResult ->" + testedUpdateWriteResult);
-			return ResponseUtils.generateSuccessString("Added user sucessfully");
+			return ResponseUtils.generateSuccessString("You left the classroom sucessfully");
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
@@ -289,16 +290,19 @@ public class UserServiceImpl implements UserService {
 	public Map<String, Object> removeFromClassroom(String token, String classroomId, String userId) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
-		ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).update("userList",
-				FieldValue.arrayRemove(userId));
+
+		System.out.println("***************");
+		System.out.println(classroomId);
 		try {
+			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).update("userList",
+					FieldValue.arrayRemove(userId));
 			WriteResult testedUpdateWriteResult = docRef.get();
 			System.out.println("testedUpdateWriteResult ->" + testedUpdateWriteResult);
-			return ResponseUtils.generateSuccessString("Added user sucessfully");
+			return ResponseUtils.generateSuccessString("Removed user sucessfully");
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
-		return ResponseUtils.generateErrorCode(400, "failed to leave  classroom", "/leaveClassroom");
+		return ResponseUtils.generateErrorCode(400, "Failed to leave  classroom", "/leaveClassroom");
 	}
 
 	@Override
@@ -355,7 +359,7 @@ public class UserServiceImpl implements UserService {
 			DocumentSnapshot documentSnapshot = documentReference.get();
 			System.out.println("documentSnapshot ->" + documentSnapshot);
 			Classroom classroom = documentSnapshot.toObject(Classroom.class);
-			Map<String, Object> map=new Hashtable<>();
+			Map<String, Object> map = new Hashtable<>();
 			map.put(uid, classroom);
 			return map;
 		} catch (Exception e) {
@@ -363,7 +367,7 @@ public class UserServiceImpl implements UserService {
 		}
 		return null;
 	}
-	
+
 	public Map<String, Object> getUserAfterRequest(String uid) {
 		DocumentReference docRef = firestore.collection("users").document(uid);
 		try {
@@ -372,9 +376,23 @@ public class UserServiceImpl implements UserService {
 			DocumentSnapshot documentSnapshot = documentReference.get();
 			System.out.println("documentSnapshot ->" + documentSnapshot);
 			Classroom classroom = documentSnapshot.toObject(Classroom.class);
-			Map<String, Object> map=new Hashtable<>();
+			Map<String, Object> map = new Hashtable<>();
 			map.put(uid, classroom);
 			return map;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private String findUserByUid(String newOwnerId) {
+		try {
+			DocumentReference documentReference = firestore.collection("users").document(newOwnerId);
+			ApiFuture<DocumentSnapshot> apiFuture = documentReference.get();
+			DocumentSnapshot documentSnapshot = apiFuture.get();
+			if (documentSnapshot.exists()) {
+				return (String) documentSnapshot.get("email");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

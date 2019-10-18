@@ -24,9 +24,9 @@ public interface UserService {
 
 	public Map<String, Object> getUsersInClassroom(String token, String classroomId);
 
-	public Map<String, Object> transferClassroom(String token, String newOwnerId, String classroomId);
+	public Map<String, Object> transferClassroom(String token, String classroomId, String newOwnerId);
 	
-	public Map<String, Object> addToClassroom(String token, String userEmail, String classroomId);
+	public Map<String, Object> addToClassroom(String token, String classroomId, String userId);
 	
 	public Map<String, Object> leaveClassroom(String token, String classroomId);
 	
