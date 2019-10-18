@@ -12,7 +12,7 @@ public interface TaskService {
 	public Map<String, Object> deleteTask (String token,String classroomId,String taskId);
 	public Map<String, Object>updateTask (String token,String classroomId,Task task);
 	//TODO wait for android
-	public Map<String, Object>updateTaskImage (String token,String classroomId);
+	Map<String, Object> updateTaskImage(String token, String classroomId, String taskId);
 
 
 }

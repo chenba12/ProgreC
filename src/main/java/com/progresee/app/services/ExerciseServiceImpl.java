@@ -3,8 +3,12 @@ package com.progresee.app.services;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.google.cloud.firestore.Firestore;
 import com.progresee.app.beans.Exercise;
 import com.progresee.app.services.dao.ExerciseService;
 
@@ -16,6 +20,12 @@ public class ExerciseServiceImpl implements ExerciseService{
 
 	@Autowired
 	private UserServiceImpl userService;
+	
+	@Autowired
+	Firestore firestore;
+
+	@Autowired
+	HttpServletResponse response;
 
 	@PostConstruct
 	public void initDB() {

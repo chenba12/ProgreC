@@ -78,8 +78,8 @@ public class UserServiceImpl implements UserService {
 		System.out.println("mapWITHOUTUID -> " + map);
 		ApiFuture<WriteResult> docRef = firestore.collection("users").document(uid).set(user);
 		try {
-			WriteResult testedUpdateWriteResult = docRef.get();
-			System.out.println("testedUpdateWriteResult ->" + testedUpdateWriteResult);
+			WriteResult writeResult = docRef.get();
+			System.out.println("writeResult ->" + writeResult);
 			return getUserAfterRequest(uid);
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
@@ -166,8 +166,11 @@ public class UserServiceImpl implements UserService {
 		ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).update("name",
 				classroomName);
 		try {
-			WriteResult testedUpdateWriteResult = docRef.get();
-			return getClassroomAfterRequest(classroomId);
+			WriteResult writeResult = docRef.get();
+			if (writeResult.getUpdateTime()!=null) {
+				return getClassroomAfterRequest(classroomId);
+			}
+			
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
@@ -180,8 +183,8 @@ public class UserServiceImpl implements UserService {
 		System.out.println("map -> " + map);
 		ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).delete();
 		try {
-			WriteResult testedUpdateWriteResult = docRef.get();
-			System.out.println("testedUpdateWriteResult ->" + testedUpdateWriteResult);
+			WriteResult writeResult = docRef.get();
+			System.out.println("writeResult ->" + writeResult);
 			return ResponseUtils.generateSuccessString("classroom deleted");
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
@@ -193,7 +196,6 @@ public class UserServiceImpl implements UserService {
 	public Map<String, Object> getUsersInClassroom(String token, String classroomId) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
-		String uid = (String) map.get("uid");
 		DocumentReference docRef = firestore.collection("classrooms").document(classroomId);
 		try {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
@@ -253,8 +255,8 @@ public class UserServiceImpl implements UserService {
 		ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).update("userList",
 				FieldValue.arrayUnion(userId));
 		try {
-			WriteResult testedUpdateWriteResult = docRef.get();
-			System.out.println("testedUpdateWriteResult ->" + testedUpdateWriteResult);
+			WriteResult writeResult = docRef.get();
+			System.out.println("writeResult ->" + writeResult);
 			return ResponseUtils.generateSuccessString("Added user sucessfully");
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
@@ -270,8 +272,8 @@ public class UserServiceImpl implements UserService {
 		ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).update("userList",
 				FieldValue.arrayRemove(uid));
 		try {
-			WriteResult testedUpdateWriteResult = docRef.get();
-			System.out.println("testedUpdateWriteResult ->" + testedUpdateWriteResult);
+			WriteResult writeResult = docRef.get();
+			System.out.println("writeResult ->" + writeResult);
 			return ResponseUtils.generateSuccessString("You left the classroom sucessfully");
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
@@ -290,8 +292,8 @@ public class UserServiceImpl implements UserService {
 		try {
 			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).update("userList",
 					FieldValue.arrayRemove(userId));
-			WriteResult testedUpdateWriteResult = docRef.get();
-			System.out.println("testedUpdateWriteResult ->" + testedUpdateWriteResult);
+			WriteResult writeResult = docRef.get();
+			System.out.println("writeResult ->" + writeResult);
 			return ResponseUtils.generateSuccessString("Removed user sucessfully");
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
@@ -345,7 +347,7 @@ public class UserServiceImpl implements UserService {
 		return null;
 	}
 
-	public Map<String, Object> getClassroomAfterRequest(String uid) {
+	private Map<String, Object> getClassroomAfterRequest(String uid) {
 		DocumentReference docRef = firestore.collection("classrooms").document(uid);
 		try {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
@@ -362,7 +364,7 @@ public class UserServiceImpl implements UserService {
 		return null;
 	}
 
-	public Map<String, Object> getUserAfterRequest(String uid) {
+	private Map<String, Object> getUserAfterRequest(String uid) {
 		DocumentReference docRef = firestore.collection("users").document(uid);
 		try {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
