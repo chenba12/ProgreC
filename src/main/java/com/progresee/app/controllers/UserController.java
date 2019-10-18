@@ -28,7 +28,7 @@ import com.google.firestore.v1beta1.Document;
 import com.progresee.app.beans.Classroom;
 import com.progresee.app.beans.User;
 import com.progresee.app.beans.fbUser;
-import com.progresee.app.services.UserService;
+import com.progresee.app.services.UserServiceImpl;
 import com.progresee.app.utils.NullCheckerUtils;
 
 @RestController
@@ -37,7 +37,7 @@ import com.progresee.app.utils.NullCheckerUtils;
 public class UserController {
 
 	@Autowired
-	private UserService service;
+	private UserServiceImpl service;
 	
 	
 	@GetMapping("/firebaseUsers") 

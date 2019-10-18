@@ -7,14 +7,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.progresee.app.services.UserService;
+import com.progresee.app.services.UserServiceImpl;
 
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
 
 	@Autowired
-	private UserService userService;
+	private UserServiceImpl userService;
 	
 	//User Stuff
 	

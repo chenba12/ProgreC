@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.progresee.app.beans.Exercise;
 import com.progresee.app.repositories.ExerciseRepository;
-import com.progresee.app.services.ExerciseService;
+import com.progresee.app.services.ExerciseServiceImpl;
 
 @RestController
 @RequestMapping("/exercise")
@@ -24,7 +24,7 @@ import com.progresee.app.services.ExerciseService;
 public class ExerciseController {
 
 	@Autowired
-	private ExerciseService exerciseService;
+	private ExerciseServiceImpl exerciseService;
 
 	@Autowired
 	private ExerciseRepository exerciseRepository;

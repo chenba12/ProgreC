@@ -18,7 +18,7 @@ import java.net.URL;
 import java.util.Date;
 
 @Service
-public class StorageService {
+public class StorageServiceImpl {
 
 	private AmazonS3 s3Client;
 

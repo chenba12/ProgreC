@@ -22,7 +22,7 @@ import com.progresee.app.utils.BadRequestsResponse;
 
 @Transactional
 @Service
-public class ExerciseService {
+public class ExerciseServiceImpl {
 
 	@Autowired
 	private TaskRepository taskRepository;
@@ -37,7 +37,7 @@ public class ExerciseService {
 	private CompletedRepository completedRepository;
 
 	@Autowired
-	private UserService userService;
+	private UserServiceImpl userService;
 
 	@PostConstruct
 	public void initDB() {

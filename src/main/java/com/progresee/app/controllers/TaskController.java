@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.progresee.app.beans.Task;
-import com.progresee.app.services.TaskService;
+import com.progresee.app.services.TaskServiceImpl;
 import com.progresee.app.utils.NullCheckerUtils;
 
 @RestController
@@ -24,7 +24,7 @@ import com.progresee.app.utils.NullCheckerUtils;
 public class TaskController {
 
 	@Autowired
-	private TaskService taskService;
+	private TaskServiceImpl taskService;
 
 	// http://localhost:5000/task/getAll?{classRoomId}
 	@GetMapping("/getAll")

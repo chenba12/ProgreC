@@ -21,10 +21,10 @@ import javax.transaction.Transactional;
 
 @Transactional
 @Service
-public class TaskService {
+public class TaskServiceImpl {
 
 	@Autowired
-	private UserService userService;
+	private UserServiceImpl userService;
 
 	@Autowired
 	private TaskRepository taskRepository;
@@ -36,7 +36,7 @@ public class TaskService {
 	private ClassroomRepository classRoomRepository;
 
 	@Autowired
-	private StorageService storageService;
+	private StorageServiceImpl storageService;
 
 	@PostConstruct
 	public void initDB() {
