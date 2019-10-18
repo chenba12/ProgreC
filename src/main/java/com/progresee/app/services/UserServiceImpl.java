@@ -1,6 +1,5 @@
 package com.progresee.app.services;
 
-import java.lang.reflect.Array;
 import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.List;
@@ -10,19 +9,14 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.tomcat.util.http.ResponseUtil;
-import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteResult;
 import com.google.firebase.auth.FirebaseAuth;

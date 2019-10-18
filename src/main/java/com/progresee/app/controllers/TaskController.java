@@ -1,5 +1,7 @@
 package com.progresee.app.controllers;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -28,50 +30,50 @@ public class TaskController {
 
 	// http://localhost:5000/task/getAll?{classRoomId}
 	@GetMapping("/getAll")
-	public ResponseEntity<Object> getAllTasks(@RequestHeader("Authorization") String token,
-			@RequestParam long classRoomId) {
+	public Map<String, Object> getAllTasks(@RequestHeader("Authorization") String token,
+			@RequestParam String classRoomId) {
 		return taskService.getAllTasks(token, classRoomId);
 	}
 
 	// http://localhost:5000/task/getTask?{classRoomId}/{taskId}
 	@GetMapping("/getTask")
-	public ResponseEntity<Object> getTask(@RequestHeader("Authorization") String token, @RequestParam long classRoomId,
-			@RequestParam long taskId) {
+	public Map<String, Object> getTask(@RequestHeader("Authorization") String token, @RequestParam String classRoomId,
+			@RequestParam String taskId) {
 		return taskService.getTask(token, classRoomId, taskId);
 	}
 
 	// http://localhost:5000/task/createTask?{classRoomId}
 	@PostMapping("/createTask")
-	public ResponseEntity<Object> createTask(@RequestHeader("Authorization") String token,
-			@RequestParam long classRoomId, @RequestBody Task task) {
+	public Map<String, Object> createTask(@RequestHeader("Authorization") String token,
+			@RequestParam String classRoomId, @RequestBody Task task) {
 		if (NullCheckerUtils.taskNullChecker(task)) {
 			return taskService.createTask(token, classRoomId, task);
 		}
-		return ResponseEntity.badRequest().body("Task values cannot be null/empty");
+		return null;
 
 	}
 
 	// http://localhost:5000/task/delete?{classRoomId}
 	@DeleteMapping("/deleteTask")
-	public ResponseEntity<Object> deleteTask(@RequestHeader("Authorization") String token,
-			@RequestParam long classRoomId, @RequestParam long taskId) {
+	public Map<String, Object> deleteTask(@RequestHeader("Authorization") String token,
+			@RequestParam String classRoomId, @RequestParam String taskId) {
 		return taskService.deleteTask(token, classRoomId, taskId);
 	}
 
 	// http://localhost:5000/task/update?{classRoomId}
 	@PutMapping("/update")
-	public ResponseEntity<Object> updateTask(@RequestHeader("Authorization") String token,
-			@RequestParam long classRoomId, @RequestBody Task task) {
+	public Map<String, Object> updateTask(@RequestHeader("Authorization") String token,
+			@RequestParam String classRoomId, @RequestBody Task task) {
 		if (NullCheckerUtils.taskNullChecker(task)) {
 			return taskService.updateTask(token, classRoomId, task);
 		}
-		return ResponseEntity.badRequest().body("Task values cannot be null/empty");
+		return null;
 	}
 
 	// http://localhost:5000/task/update?{classRoomId}?{taskId}
 	@PutMapping("/updateImage")
-	public ResponseEntity<Object> updateTaskImage(@RequestHeader("Authorization") String token,
-			@RequestParam long classRoomId, @RequestParam long taskId, @RequestPart MultipartFile file) {
+	public Map<String, Object> updateTaskImage(@RequestHeader("Authorization") String token,
+			@RequestParam String classRoomId, @RequestParam String taskId, @RequestPart MultipartFile file) {
 		return taskService.updateTaskImage(token, classRoomId, taskId, file);
 	}
 }

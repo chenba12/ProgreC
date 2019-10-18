@@ -2,8 +2,6 @@ package com.progresee.app.beans;
 
 import java.util.Date;
 
-import com.google.cloud.firestore.FieldValue;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

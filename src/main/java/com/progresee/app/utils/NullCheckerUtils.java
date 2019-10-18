@@ -27,14 +27,14 @@ public class NullCheckerUtils {
 	}
 
 	public static boolean exerciseNullChecker(Exercise exercise) {
-		if (exercise.getEx() != null && exercise.getEx() != "") {
+		if (exercise.getExerciseTitle()!= null && exercise.getExerciseTitle() != "") {
 			return true;
 		}
 		return false;
 	}
 
 	public static boolean classroomNullChecker(Classroom classroom) {
-		if (classroom.getName() != null && classroom.getId() != 0 && classroom.getOwner() != null) {
+		if (classroom.getName() != null && classroom.getOwner() != null) {
 			if (classroom.getName().trim() != "" && classroom.getOwner().trim() != "") {
 				return true;
 			}
