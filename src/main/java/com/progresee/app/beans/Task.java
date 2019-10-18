@@ -1,5 +1,7 @@
 package com.progresee.app.beans;
 
+import java.util.Date;
+
 import com.google.cloud.firestore.FieldValue;
 
 import lombok.AllArgsConstructor;
@@ -11,12 +13,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Task {
 	
-	private String uid;
 	private String title;
 	private String description;
 	private String imageUrl;
-	private FieldValue startDate;
-	private FieldValue endDate;
+	private Date startDate;
+	private Date endDate;
 	
 
 }

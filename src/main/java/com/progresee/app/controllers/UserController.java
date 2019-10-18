@@ -31,9 +31,8 @@ import com.google.firebase.cloud.FirestoreClient;
 import com.google.firestore.v1beta1.Document;
 import com.progresee.app.beans.Classroom;
 import com.progresee.app.beans.User;
-import com.progresee.app.services.UserService;
-import com.progresee.app.utils.BadRequestsResponse;
-import com.progresee.app.utils.ErrorUtils;
+import com.progresee.app.services.UserServiceImpl;
+import com.progresee.app.utils.ResponseUtils;
 import com.progresee.app.utils.NullCheckerUtils;
 
 @RestController
@@ -47,149 +46,82 @@ public class UserController {
 	@Autowired
 	HttpServletResponse res;
 
-	@GetMapping("/firebaseUsers")
-	public Map<String, Object> getFirebaseUser() throws InterruptedException, ExecutionException {
-
-		Firestore db = FirestoreClient.getFirestore();
-		DocumentReference docRef = db.collection("users").document("asfasdfa");
-		// asynchronously retrieve the document
-		ApiFuture<DocumentSnapshot> future = docRef.get();
-		// ...
-		// future.get() blocks on response
-		DocumentSnapshot document = future.get();
-		if (document.exists()) {
-		  return document.getData();
-		} else {
-		 res.setStatus(400);
-		 return ErrorUtils.generateErrorCode(400, "asdgfaskjdhf", "/firebaseUsers");
-		}
-
-
-	}
-
-	@GetMapping("/firebaseUserWrite")
-	public ResponseEntity<Object> writeFirebaseUser() throws InterruptedException, ExecutionException {
-		Firestore db = FirestoreClient.getFirestore();
-		fbUser fbUser=new fbUser();
-		fbUser.setEmail("email");
-		fbUser.setName("chen");
-		fbUser.setTimestampFieldValue(FieldValue.serverTimestamp());
-
-		ApiFuture<DocumentReference> docRef = db.collection("Users").add(fbUser);
-		// asynchronously retrieve the document
-		DocumentReference future = docRef.get();
-		// ...
-		// future.get() blocks on response
-		ApiFuture<DocumentSnapshot> document = future.get();
-
-		  System.out.println("Document data: " + document.get().getData());
-
-		return null;
-
-	}
-
-	@GetMapping("/firebasetask")
-	public ResponseEntity<Object> firebasetask() throws InterruptedException, ExecutionException {
-		Firestore db = FirestoreClient.getFirestore();
-
-
-		CollectionReference docRef = db.collection("Classrooms").document("NwW2VsENepvjQYdsGceO").collection("Tasks");
-		// asynchronously retrieve the document
-		ApiFuture<QuerySnapshot> future = docRef.get();
-		// ...
-		// future.get() blocks on response
-		QuerySnapshot document = future.get();
-
-		  System.out.println("Document data: " + document.getDocuments().size());
-
-		return null;
-
-	}
-
-
-
-
-
 	@GetMapping("/getCurrentUser")
-	public ResponseEntity<Object> getCurrentUser(@RequestHeader("Authorization") String token) {
-		return service.getCurrentUser(token);
+	public Map<String, Object> getCurrentUser(@RequestHeader("Authorization") String token) {
+		return service.getUser(token);
 	}
 
 	// http://localhost:5000/user/updateUser
 	@PutMapping("/updateUser")
-	public ResponseEntity<Object> updateUser(@RequestHeader("Authorization") String token, @RequestBody User user) {
+	public String updateUser(@RequestHeader("Authorization") String token, @RequestBody User user) {
 		if (NullCheckerUtils.userNullChecker(user)) {
 			return service.updateUser(token, user);
 		}
-		return ResponseEntity.badRequest().body("User values cannot be null/empty");
+		return null;
 	}
 
 	@GetMapping("/getClassroom")
-	public ResponseEntity<Object> getClassroom(@RequestHeader("Authorization") String token,
-			@RequestParam long classroomId) {
+	public Map<String, Object> getClassroom(@RequestHeader("Authorization") String token,
+			@RequestParam String classroomId) {
 		return service.getClassroom(token, classroomId);
 	}
 
 	@GetMapping("/getClassrooms")
-	public ResponseEntity<Object> getClassrooms(@RequestHeader("Authorization") String token) {
+	public Map<String, Object> getClassrooms(@RequestHeader("Authorization") String token) {
 		return service.getClassrooms(token);
 	}
 
-
 	// http://localhost:5000/user/createClassroom
 	@PostMapping("/createClassroom")
-	public ResponseEntity<Object> createClassroom(@RequestHeader("Authorization") String token,
+	public Map<String, Object> createClassroom(@RequestHeader("Authorization") String token,
 			@RequestParam String name) {
 		return service.createClassroom(token, name);
 	}
 
 	@PutMapping("/updateClassroom")
-	public ResponseEntity<Object> updateClassroom(@RequestHeader("Authorization") String token,
-			@RequestBody Classroom classroom) {
-		if (NullCheckerUtils.classroomNullChecker(classroom)) {
-			return service.updateClassroom(token, classroom);
-		}
-		return ResponseEntity.badRequest().body("Classroom values cannot be null/empty");
+	public String updateClassroom(@RequestHeader("Authorization") String token,
+			@RequestParam String classroomId, @RequestParam String name) {
+		return service.updateClassroom(token, classroomId, name);
+
 	}
 
 	@DeleteMapping("/deleteClassroom")
-	public ResponseEntity<Object> deleteClassroom(@RequestHeader("Authorization") String token,
-			@RequestParam long classroomId) {
-		return service.deleteClassroom(token,classroomId);
+	public String deleteClassroom(@RequestHeader("Authorization") String token,
+			@RequestParam String classroomId) {
+		return service.deleteClassroom(token, classroomId);
 	}
 
 	@GetMapping("/getUsersInClassroom")
-	public ResponseEntity<Object> getUsersInClassroom(@RequestHeader("Authorization") String token,
-			@RequestParam long classroomId) {
-		return service.getUsersInclassroom(token,classroomId);
+	public Map<String, Object> getUsersInClassroom(@RequestHeader("Authorization") String token,
+			@RequestParam String classroomId) {
+		return service.getUsersInClassroom(token, classroomId);
 	}
 
 	@PutMapping("/transferClassroom")
-	public ResponseEntity<Object> transferClassroom(@RequestHeader("Authorization") String token,
-			@RequestParam long classroomId, @RequestParam String email) {
+	public Map<String, Object> transferClassroom(@RequestHeader("Authorization") String token,
+			@RequestParam String classroomId, @RequestParam String email) {
 		return service.transferClassroom(token, classroomId, email);
 	}
 
 	// http://localhost:5000/user/addToClassroom
 	@PutMapping("addToClassroom")
-	public ResponseEntity<Object> addToClassroom(@RequestHeader("Authorization") String token,
-			@RequestParam String userEmail, @RequestParam long classroomId) {
-		return service.addUserToClassroom(token, userEmail, classroomId);
+	public Map<String, Object> addToClassroom(@RequestHeader("Authorization") String token,
+			@RequestParam String userId, @RequestParam String classroomId) {
+		return service.addToClassroom(token, userId, classroomId);
 	}
 
 	// http://localhost:5000/user/leaveClassroom
 	@PutMapping("leaveClassroom")
-	public ResponseEntity<Object> leaveClassroom(@RequestHeader("Authorization") String token,
-			@RequestParam long classroomId) {
+	public Map<String, Object> leaveClassroom(@RequestHeader("Authorization") String token,
+			@RequestParam String classroomId) {
 		return service.leaveClassroom(token, classroomId);
 	}
 
 	// http://localhost:5000/user/removeUser
 	@PutMapping("removeUser")
-	public ResponseEntity<Object> removeFromClassroom(@RequestHeader("Authorization") String token,
-			@RequestParam long userId, @RequestParam long classroomId) {
-		return service.removeUser(token, userId, classroomId);
+	public Map<String, Object> removeFromClassroom(@RequestHeader("Authorization") String token,
+			@RequestParam String userId, @RequestParam String classroomId) {
+		return service.removeFromClassroom(token, userId, classroomId);
 	}
-
 
 }

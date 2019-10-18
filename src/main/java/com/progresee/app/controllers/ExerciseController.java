@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.progresee.app.beans.Exercise;
-import com.progresee.app.repositories.ExerciseRepository;
 import com.progresee.app.services.ExerciseServiceImpl;
 
 @RestController
