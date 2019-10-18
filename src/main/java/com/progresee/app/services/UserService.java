@@ -25,17 +25,12 @@ import com.progresee.app.beans.Task;
 import com.progresee.app.beans.User;
 import com.progresee.app.repositories.ClassroomRepository;
 import com.progresee.app.repositories.UserRepository;
-import com.progresee.app.utils.BadRequestsResponse;
+import com.progresee.app.utils.ErrorUtils;
 
 @Service
-@Transactional
 public class UserService {
 
-	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private ClassroomRepository classroomRepository;
+	
 
 	@PostConstruct
 	public void initDB() {
@@ -112,7 +107,7 @@ public class UserService {
 		if (user != null) {
 			return ResponseEntity.ok(user);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> updateUser(String token, User user) {
@@ -124,7 +119,7 @@ public class UserService {
 			user.setRole(tempUser.getRole());
 			return ResponseEntity.ok(userRepository.save(user));
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public User deleteUser(long id) {
@@ -141,9 +136,9 @@ public class UserService {
 					return ResponseEntity.ok(user.getClassrooms().get(classroomId));
 				}
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classroomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classroomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> getClassrooms(String token) {
@@ -157,7 +152,7 @@ public class UserService {
 				return ResponseEntity.ok(classroomList);
 			}
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> createClassroom(String token, String name) {
@@ -178,7 +173,7 @@ public class UserService {
 			}
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Classroom name cant be null/empty");
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> updateClassroom(String token, Classroom classRoom) {
@@ -193,12 +188,12 @@ public class UserService {
 						classRoom.setTasks(tempClassroom.getTasks());
 						return ResponseEntity.ok(classroomRepository.save(classRoom));
 					}
-					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BadRequestsResponse.OWNER);
+					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorUtils.OWNER);
 				}
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoom.getId());
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoom.getId());
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 
 	}
 
@@ -216,13 +211,13 @@ public class UserService {
 						userRepository.save(user);
 						return ResponseEntity.ok(classroomId);
 					}
-					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BadRequestsResponse.OWNER);
+					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorUtils.OWNER);
 				}
 
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classroomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classroomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> addUserToClassroom(String token, String userEmail, long classRoomId) {
@@ -246,13 +241,13 @@ public class UserService {
 					return ResponseEntity.badRequest().body("User already in classroom :(");
 			
 			}
-				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BadRequestsResponse.OWNER);
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorUtils.OWNER);
 		}
 
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 		
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> leaveClassroom(String token, long classRoomId) {
@@ -268,9 +263,9 @@ public class UserService {
 				}
 				return ResponseEntity.badRequest().body("You are not a part of this classroom");
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> removeUser(String token, long userId, long classRoomId) {
@@ -292,14 +287,14 @@ public class UserService {
 								.body("User with id " + userId + " is not a part of classroom with id " + classRoomId);
 
 					}
-					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BadRequestsResponse.OWNER);
+					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorUtils.OWNER);
 				}
-				return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+				return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 			}
 
 		}
 
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> transferClassroom(String token, long classroomId, String email) {
@@ -320,14 +315,14 @@ public class UserService {
 							}
 							return ResponseEntity.badRequest().body("The user is not a part of this classroom");
 						}
-						return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+						return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 					}
-					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BadRequestsResponse.OWNER);
+					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorUtils.OWNER);
 				}
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classroomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classroomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 
 	}
 
@@ -350,9 +345,9 @@ public class UserService {
 					return ResponseEntity.ok(usersList);
 				}
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classroomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classroomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 }

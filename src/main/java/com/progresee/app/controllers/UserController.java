@@ -1,7 +1,11 @@
 package com.progresee.app.controllers;
 
 import java.time.LocalDateTime;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +31,9 @@ import com.google.firebase.cloud.FirestoreClient;
 import com.google.firestore.v1beta1.Document;
 import com.progresee.app.beans.Classroom;
 import com.progresee.app.beans.User;
-import com.progresee.app.beans.fbUser;
 import com.progresee.app.services.UserService;
+import com.progresee.app.utils.BadRequestsResponse;
+import com.progresee.app.utils.ErrorUtils;
 import com.progresee.app.utils.NullCheckerUtils;
 
 @RestController
@@ -39,22 +44,26 @@ public class UserController {
 	@Autowired
 	private UserService service;
 	
+	@Autowired
+	HttpServletResponse res;
 	
 	@GetMapping("/firebaseUsers") 
-	public ResponseEntity<Object> getFirebaseUser() throws InterruptedException, ExecutionException {
+	public Map<String, Object> getFirebaseUser() throws InterruptedException, ExecutionException {
+		
 		Firestore db = FirestoreClient.getFirestore();
-		DocumentReference docRef = db.collection("Users").document("NliQxCHK7Ln1qQe6irs0");
+		DocumentReference docRef = db.collection("users").document("asfasdfa");
 		// asynchronously retrieve the document
 		ApiFuture<DocumentSnapshot> future = docRef.get();
 		// ...
 		// future.get() blocks on response
 		DocumentSnapshot document = future.get();
 		if (document.exists()) {
-		  System.out.println("Document data: " + document.getData());
+		  return document.getData();
 		} else {
-		  System.out.println("No such document!");
+		 res.setStatus(400);
+		 return ErrorUtils.generateErrorCode(400, "asdgfaskjdhf", "/firebaseUsers");
 		}
-		return null;
+		
 		
 	}
 	

@@ -12,31 +12,21 @@ import com.progresee.app.beans.User;
 import com.progresee.app.repositories.ClassroomRepository;
 import com.progresee.app.repositories.TaskRepository;
 import com.progresee.app.repositories.UserRepository;
-import com.progresee.app.utils.BadRequestsResponse;
+import com.progresee.app.utils.ErrorUtils;
 import java.time.LocalDateTime;
 import java.util.Hashtable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.transaction.Transactional;
 
-@Transactional
+
 @Service
 public class TaskService {
 
 	@Autowired
 	private UserService userService;
 
-	@Autowired
-	private TaskRepository taskRepository;
 
-	@Autowired
-	private UserRepository memebersRepository;
-
-	@Autowired
-	private ClassroomRepository classRoomRepository;
-
-	@Autowired
-	private StorageService storageService;
 
 	@PostConstruct
 	public void initDB() {
@@ -61,10 +51,10 @@ public class TaskService {
 					}
 					return ResponseEntity.badRequest().body("No tasks found");
 				}
-				return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+				return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 			}
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> getTask(String token, long classRoomId, long taskId) {
@@ -81,12 +71,12 @@ public class TaskService {
 							return ResponseEntity.ok(task);
 						}
 					}
-					return ResponseEntity.badRequest().body(BadRequestsResponse.TASK_ID_NOT_FOUND + taskId);
+					return ResponseEntity.badRequest().body(ErrorUtils.TASK_ID_NOT_FOUND + taskId);
 				}
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 	//TODO .setOpenTasks+1
 	public ResponseEntity<Object> createTask(String token, long classRoomId, Task task) {
@@ -106,11 +96,11 @@ public class TaskService {
 					memebersRepository.save(user);
 					return ResponseEntity.ok(task);
 				}
-				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BadRequestsResponse.OWNER);
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorUtils.OWNER);
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> deleteTask(String token, long classRoomId, long taskId) {
@@ -135,14 +125,14 @@ public class TaskService {
 								return ResponseEntity.ok(task);
 							}
 						}
-						return ResponseEntity.badRequest().body(BadRequestsResponse.TASK_ID_NOT_FOUND + taskId);
+						return ResponseEntity.badRequest().body(ErrorUtils.TASK_ID_NOT_FOUND + taskId);
 					}
-					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BadRequestsResponse.OWNER);
+					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorUtils.OWNER);
 				}
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> updateTask(String token, long classRoomId, Task task) {
@@ -165,14 +155,14 @@ public class TaskService {
 								return ResponseEntity.ok(task);
 							}
 						}
-						return ResponseEntity.badRequest().body(BadRequestsResponse.TASK_ID_NOT_FOUND + task.getId());
+						return ResponseEntity.badRequest().body(ErrorUtils.TASK_ID_NOT_FOUND + task.getId());
 					}
-					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BadRequestsResponse.OWNER);
+					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorUtils.OWNER);
 				}
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> updateTaskImage(String token, long classRoomId, long taskId, MultipartFile file) {
@@ -194,14 +184,14 @@ public class TaskService {
 								return ResponseEntity.ok(task);
 							}
 						}
-						return ResponseEntity.badRequest().body(BadRequestsResponse.TASK_ID_NOT_FOUND + taskId);
+						return ResponseEntity.badRequest().body(ErrorUtils.TASK_ID_NOT_FOUND + taskId);
 					}
-					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BadRequestsResponse.OWNER);
+					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorUtils.OWNER);
 				}
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 }
