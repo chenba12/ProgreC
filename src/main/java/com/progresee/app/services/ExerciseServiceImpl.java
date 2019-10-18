@@ -18,23 +18,13 @@ import com.progresee.app.repositories.CompletedRepository;
 import com.progresee.app.repositories.ExerciseRepository;
 import com.progresee.app.repositories.TaskRepository;
 import com.progresee.app.repositories.UserRepository;
-import com.progresee.app.utils.BadRequestsResponse;
+import com.progresee.app.utils.ErrorUtils;
 
-@Transactional
+
 @Service
 public class ExerciseServiceImpl {
 
-	@Autowired
-	private TaskRepository taskRepository;
-
-	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private ExerciseRepository exerciseRepository;
-
-	@Autowired
-	private CompletedRepository completedRepository;
+	
 
 	@Autowired
 	private UserServiceImpl userService;
@@ -66,12 +56,12 @@ public class ExerciseServiceImpl {
 							ResponseEntity.badRequest().body("No exercises found");
 						}
 					}
-					return ResponseEntity.badRequest().body(BadRequestsResponse.TASK_ID_NOT_FOUND + taskId);
+					return ResponseEntity.badRequest().body(ErrorUtils.TASK_ID_NOT_FOUND + taskId);
 				}
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> getExercise(String token, long classRoomId, long taskId, long exerciseId) {
@@ -90,15 +80,15 @@ public class ExerciseServiceImpl {
 								return ResponseEntity.ok(exercise);
 							}
 							return ResponseEntity.badRequest()
-									.body(BadRequestsResponse.EXERCISE_ID_NOT_FOUND + exerciseId);
+									.body(ErrorUtils.EXERCISE_ID_NOT_FOUND + exerciseId);
 						}
 					}
-					return ResponseEntity.badRequest().body(BadRequestsResponse.TASK_ID_NOT_FOUND + taskId);
+					return ResponseEntity.badRequest().body(ErrorUtils.TASK_ID_NOT_FOUND + taskId);
 				}
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> getFinishedUsers(String token, long classRoomId, long taskId, long exerciseId) {
@@ -122,17 +112,17 @@ public class ExerciseServiceImpl {
 										}
 									}
 									return ResponseEntity.badRequest()
-											.body(BadRequestsResponse.EXERCISE_ID_NOT_FOUND + exerciseId);
+											.body(ErrorUtils.EXERCISE_ID_NOT_FOUND + exerciseId);
 								}
 							}
-						return ResponseEntity.badRequest().body(BadRequestsResponse.TASK_ID_NOT_FOUND + taskId);
+						return ResponseEntity.badRequest().body(ErrorUtils.TASK_ID_NOT_FOUND + taskId);
 					}
-					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BadRequestsResponse.OWNER);
+					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorUtils.OWNER);
 				}
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> createExercise(String token, long classRoomId, long taskId, Exercise exercise) {
@@ -159,14 +149,14 @@ public class ExerciseServiceImpl {
 							}
 						}
 					}
-					return ResponseEntity.badRequest().body(BadRequestsResponse.TASK_ID_NOT_FOUND + taskId);
+					return ResponseEntity.badRequest().body(ErrorUtils.TASK_ID_NOT_FOUND + taskId);
 				}
-				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BadRequestsResponse.OWNER);
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorUtils.OWNER);
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 		}
 
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 
 	}
 
@@ -192,17 +182,17 @@ public class ExerciseServiceImpl {
 									}
 								}
 								return ResponseEntity.badRequest()
-										.body(BadRequestsResponse.EXERCISE_ID_NOT_FOUND + exerciseId);
+										.body(ErrorUtils.EXERCISE_ID_NOT_FOUND + exerciseId);
 							}
 						}
-						return ResponseEntity.badRequest().body(BadRequestsResponse.TASK_ID_NOT_FOUND + taskId);
+						return ResponseEntity.badRequest().body(ErrorUtils.TASK_ID_NOT_FOUND + taskId);
 					}
-					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BadRequestsResponse.OWNER);
+					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorUtils.OWNER);
 				}
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 
 	}
 
@@ -228,18 +218,18 @@ public class ExerciseServiceImpl {
 										return ResponseEntity.ok(exercise);
 									}
 									return ResponseEntity.badRequest()
-											.body(BadRequestsResponse.EXERCISE_ID_NOT_FOUND + exercise.getId());
+											.body(ErrorUtils.EXERCISE_ID_NOT_FOUND + exercise.getId());
 								}
 							}
 						}
-						return ResponseEntity.badRequest().body(BadRequestsResponse.TASK_ID_NOT_FOUND + taskId);
+						return ResponseEntity.badRequest().body(ErrorUtils.TASK_ID_NOT_FOUND + taskId);
 					}
-					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(BadRequestsResponse.OWNER);
+					return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorUtils.OWNER);
 				}
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 	public ResponseEntity<Object> updateExerciseStatus(String token, long classRoomId, long taskId, long exerciseId) {
@@ -274,15 +264,15 @@ public class ExerciseServiceImpl {
 								}
 							}
 							return ResponseEntity.badRequest()
-									.body(BadRequestsResponse.EXERCISE_ID_NOT_FOUND + exerciseId);
+									.body(ErrorUtils.EXERCISE_ID_NOT_FOUND + exerciseId);
 						}
 					}
-					return ResponseEntity.badRequest().body(BadRequestsResponse.TASK_ID_NOT_FOUND + taskId);
+					return ResponseEntity.badRequest().body(ErrorUtils.TASK_ID_NOT_FOUND + taskId);
 				}
 			}
-			return ResponseEntity.badRequest().body(BadRequestsResponse.CLASSROOM_ID_NOT_FOUND + classRoomId);
+			return ResponseEntity.badRequest().body(ErrorUtils.CLASSROOM_ID_NOT_FOUND + classRoomId);
 		}
-		return ResponseEntity.badRequest().body(BadRequestsResponse.USER_NOT_FOUND);
+		return ResponseEntity.badRequest().body(ErrorUtils.USER_NOT_FOUND);
 	}
 
 }

@@ -1,7 +1,11 @@
 package com.progresee.app.controllers;
 
 import java.time.LocalDateTime;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +31,9 @@ import com.google.firebase.cloud.FirestoreClient;
 import com.google.firestore.v1beta1.Document;
 import com.progresee.app.beans.Classroom;
 import com.progresee.app.beans.User;
-import com.progresee.app.beans.fbUser;
-import com.progresee.app.services.UserServiceImpl;
+import com.progresee.app.services.UserService;
+import com.progresee.app.utils.BadRequestsResponse;
+import com.progresee.app.utils.ErrorUtils;
 import com.progresee.app.utils.NullCheckerUtils;
 
 @RestController
@@ -38,68 +43,72 @@ public class UserController {
 
 	@Autowired
 	private UserServiceImpl service;
-	
-	
-	@GetMapping("/firebaseUsers") 
-	public ResponseEntity<Object> getFirebaseUser() throws InterruptedException, ExecutionException {
+
+	@Autowired
+	HttpServletResponse res;
+
+	@GetMapping("/firebaseUsers")
+	public Map<String, Object> getFirebaseUser() throws InterruptedException, ExecutionException {
+
 		Firestore db = FirestoreClient.getFirestore();
-		DocumentReference docRef = db.collection("Users").document("NliQxCHK7Ln1qQe6irs0");
+		DocumentReference docRef = db.collection("users").document("asfasdfa");
 		// asynchronously retrieve the document
 		ApiFuture<DocumentSnapshot> future = docRef.get();
 		// ...
 		// future.get() blocks on response
 		DocumentSnapshot document = future.get();
 		if (document.exists()) {
-		  System.out.println("Document data: " + document.getData());
+		  return document.getData();
 		} else {
-		  System.out.println("No such document!");
+		 res.setStatus(400);
+		 return ErrorUtils.generateErrorCode(400, "asdgfaskjdhf", "/firebaseUsers");
 		}
-		return null;
-		
+
+
 	}
-	
-	@GetMapping("/firebaseUserWrite") 
+
+	@GetMapping("/firebaseUserWrite")
 	public ResponseEntity<Object> writeFirebaseUser() throws InterruptedException, ExecutionException {
 		Firestore db = FirestoreClient.getFirestore();
 		fbUser fbUser=new fbUser();
 		fbUser.setEmail("email");
 		fbUser.setName("chen");
 		fbUser.setTimestampFieldValue(FieldValue.serverTimestamp());
-		
+
 		ApiFuture<DocumentReference> docRef = db.collection("Users").add(fbUser);
 		// asynchronously retrieve the document
 		DocumentReference future = docRef.get();
 		// ...
 		// future.get() blocks on response
 		ApiFuture<DocumentSnapshot> document = future.get();
-		
+
 		  System.out.println("Document data: " + document.get().getData());
-		
+
 		return null;
-		
+
 	}
-	
-	@GetMapping("/firebasetask") 
+
+	@GetMapping("/firebasetask")
 	public ResponseEntity<Object> firebasetask() throws InterruptedException, ExecutionException {
 		Firestore db = FirestoreClient.getFirestore();
-		
-		
+
+
 		CollectionReference docRef = db.collection("Classrooms").document("NwW2VsENepvjQYdsGceO").collection("Tasks");
 		// asynchronously retrieve the document
 		ApiFuture<QuerySnapshot> future = docRef.get();
 		// ...
 		// future.get() blocks on response
 		QuerySnapshot document = future.get();
-		
+
 		  System.out.println("Document data: " + document.getDocuments().size());
-		
+
 		return null;
-		
+
 	}
-	
-	
-	
-	
+
+
+
+
 
 	@GetMapping("/getCurrentUser")
 	public ResponseEntity<Object> getCurrentUser(@RequestHeader("Authorization") String token) {
@@ -114,13 +123,13 @@ public class UserController {
 		}
 		return ResponseEntity.badRequest().body("User values cannot be null/empty");
 	}
-	
+
 	@GetMapping("/getClassroom")
 	public ResponseEntity<Object> getClassroom(@RequestHeader("Authorization") String token,
 			@RequestParam long classroomId) {
 		return service.getClassroom(token, classroomId);
 	}
-	
+
 	@GetMapping("/getClassrooms")
 	public ResponseEntity<Object> getClassrooms(@RequestHeader("Authorization") String token) {
 		return service.getClassrooms(token);
@@ -142,13 +151,13 @@ public class UserController {
 		}
 		return ResponseEntity.badRequest().body("Classroom values cannot be null/empty");
 	}
-	
+
 	@DeleteMapping("/deleteClassroom")
 	public ResponseEntity<Object> deleteClassroom(@RequestHeader("Authorization") String token,
 			@RequestParam long classroomId) {
 		return service.deleteClassroom(token,classroomId);
 	}
-	
+
 	@GetMapping("/getUsersInClassroom")
 	public ResponseEntity<Object> getUsersInClassroom(@RequestHeader("Authorization") String token,
 			@RequestParam long classroomId) {
@@ -181,6 +190,6 @@ public class UserController {
 			@RequestParam long userId, @RequestParam long classroomId) {
 		return service.removeUser(token, userId, classroomId);
 	}
-	
+
 
 }

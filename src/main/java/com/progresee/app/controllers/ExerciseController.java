@@ -26,8 +26,7 @@ public class ExerciseController {
 	@Autowired
 	private ExerciseServiceImpl exerciseService;
 
-	@Autowired
-	private ExerciseRepository exerciseRepository;
+
 
 	@GetMapping("/getAll")
 	public List<Exercise> findAll() {
