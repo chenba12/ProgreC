@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Task {
 	
-	private String Uid;
+	private String uid;
 	private String title;
 	private String description;
 	private List<String> imageUrls=new ArrayList<String>();

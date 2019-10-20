@@ -49,24 +49,29 @@ public class TaskServiceImpl implements TaskService {
 	public Map<String, Object> getAllTasks(String token, String classroomId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
-		Query docRef = firestore.collection("classrooms").document(classroomId).collection("tasks");
-		try {
-			ApiFuture<QuerySnapshot> documentReference = docRef.get();
-			System.out.println("documentReference ->" + documentReference);
-			QuerySnapshot documentSnapshot = documentReference.get();
-			System.out.println("documentSnapshot ->" + documentSnapshot);
-			List<Task> tempTasks = documentSnapshot.toObjects(Task.class);
-			System.out.println("classrooms IN LIST---->" + tempTasks);
-			Map<String, Object> tasks = new Hashtable<>();
-			for (Task task : tempTasks) {
-				tasks.put(task.getUid(), task);
-			}
-			return tasks;
+		String uid = (String) map.get("uid");
+		if (userService.checkIfUserIsPartOfClassroom(classroomId, uid)) {
+			Query docRef = firestore.collection("classrooms").document(classroomId).collection("tasks");
+			try {
+				ApiFuture<QuerySnapshot> documentReference = docRef.get();
+				System.out.println("documentReference ->" + documentReference);
+				QuerySnapshot documentSnapshot = documentReference.get();
+				System.out.println("documentSnapshot ->" + documentSnapshot);
+				List<Task> tempTasks = documentSnapshot.toObjects(Task.class);
+				System.out.println("classrooms IN LIST---->" + tempTasks);
+				Map<String, Object> tasks = new Hashtable<>();
+				for (Task task : tempTasks) {
+					tasks.put(task.getUid(), task);
+				}
+				return tasks;
 
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+
 		}
-		return null;
+		response.setStatus(ResponseUtils.BAD_REQUEST);
+		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM, "/getAllTasks");
 
 	}
 
@@ -74,80 +79,94 @@ public class TaskServiceImpl implements TaskService {
 	public Map<String, Object> getTask(String token, String classroomId, String taskId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
-		DocumentReference docRef = firestore.collection("classrooms").document(classroomId).collection("tasks")
-				.document(taskId);
-		try {
-			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
-			System.out.println("documentReference ->" + documentReference);
-			DocumentSnapshot documentSnapshot = documentReference.get();
-			System.out.println("documentSnapshot ->" + documentSnapshot);
-			if (documentSnapshot.exists()) {
-				return documentSnapshot.getData();
+		String uid = (String) map.get("uid");
+		if (userService.checkIfUserIsPartOfClassroom(classroomId, uid)) {
+			DocumentReference docRef = firestore.collection("classrooms").document(classroomId).collection("tasks")
+					.document(taskId);
+			try {
+				ApiFuture<DocumentSnapshot> documentReference = docRef.get();
+				System.out.println("documentReference ->" + documentReference);
+				DocumentSnapshot documentSnapshot = documentReference.get();
+				System.out.println("documentSnapshot ->" + documentSnapshot);
+				if (documentSnapshot.exists()) {
+					return documentSnapshot.getData();
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
 			}
-			response.setStatus(400);
-			return ResponseUtils.generateErrorCode(400, "you are not part of this classroom", "/getTask");
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
 		}
-		return null;
+		response.setStatus(ResponseUtils.BAD_REQUEST);
+		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM, "/getAllTasks");
 	}
 
 	@Override
 	public Map<String, Object> createTask(String token, String classroomId, Task task) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
-		task.setTitle(task.getTitle());
-		task.setStartDate(Calendar.getInstance().getTime());
-		String taskUid = UUID.randomUUID().toString().replace("-", "");
-		task.setUid(taskUid);
-		ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).collection("tasks")
-				.document(taskUid).set(task);
-		try {
-			WriteResult writeResult = docRef.get();
-			if (writeResult.getUpdateTime() != null) {
-				return getTaskAfterRequest(classroomId, taskUid);
+		String uid = (String) map.get("uid");
+		if (userService.checkOwnerShip(classroomId, uid)) {
+			task.setTitle(task.getTitle());
+			task.setStartDate(Calendar.getInstance().getTime());
+			String taskUid = UUID.randomUUID().toString().replace("-", "");
+			task.setUid(taskUid);
+			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).collection("tasks")
+					.document(taskUid).set(task);
+			try {
+				WriteResult writeResult = docRef.get();
+				if (writeResult.getUpdateTime() != null) {
+					return getTaskAfterRequest(classroomId, taskUid);
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
 			}
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
 		}
-		return null;
+		response.setStatus(ResponseUtils.FORBIDDEN);
+		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.OWNER, "/createTask");
 	}
 
 	@Override
 	public Map<String, Object> deleteTask(String token, String classroomId, String taskId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
-		ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).collection("tasks")
-				.document(taskId).delete();
-		try {
-			WriteResult writeResult = docRef.get();
-			System.out.println("writeResult ->" + writeResult);
-			return ResponseUtils.generateSuccessString("Task has been deleted");
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
+		String uid = (String) map.get("uid");
+		if (userService.checkOwnerShip(classroomId, uid)) {
+			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).collection("tasks")
+					.document(taskId).delete();
+			try {
+				WriteResult writeResult = docRef.get();
+				System.out.println("writeResult ->" + writeResult);
+				return ResponseUtils.generateSuccessString("Task has been deleted");
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
 		}
-		return null;
+		response.setStatus(ResponseUtils.FORBIDDEN);
+		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.OWNER, "/createTask");
 	}
 
 	@Override
 	public Map<String, Object> updateTask(String token, String classroomId, Task task) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
-		ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).collection("tasks")
-				.document(task.getUid()).set(task);
-		try {
-			WriteResult writeResult = docRef.get();
-			if (writeResult.getUpdateTime() != null) {
-				return getTaskAfterRequest(classroomId, task.getUid());
+		String uid = (String) map.get("uid");
+		if (userService.checkOwnerShip(classroomId, uid)) {
+			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).collection("tasks")
+					.document(task.getUid()).set(task);
+			try {
+				WriteResult writeResult = docRef.get();
+				if (writeResult.getUpdateTime() != null) {
+					return getTaskAfterRequest(classroomId, task.getUid());
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
 			}
-
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
 		}
-		return null;
+		response.setStatus(ResponseUtils.FORBIDDEN);
+		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.OWNER, "/createTask");
+		
 	}
 
-	//Todo finish this with android
+	// Todo finish this with android
 	@Override
 	public Map<String, Object> updateTaskImage(String token, String classroomId, String taskId) {
 		// TODO Auto-generated method stub

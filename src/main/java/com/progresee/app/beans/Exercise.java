@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Exercise {
 	
-	private String Uid;
+	private String uid;
 	private String exerciseTitle;
 	private Date dateCreated;
 	private List<String> usrsFinishedList;

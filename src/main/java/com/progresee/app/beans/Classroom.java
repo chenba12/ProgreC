@@ -16,6 +16,7 @@ public class Classroom {
 	private String owner;
 	private Date dateCreated;
 	private List<String> userList = new ArrayList<String>();
+	private String ownerUid;
 	private String uid;
 
 }

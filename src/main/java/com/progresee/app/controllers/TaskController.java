@@ -28,7 +28,7 @@ public class TaskController {
 	private TaskServiceImpl taskService;
 
 	// http://localhost:5000/task/getAll?{classRoomId}
-	@GetMapping("/getAll")
+	@GetMapping("/getAllTasks")
 	public Map<String, Object> getAllTasks(@RequestHeader("Authorization") String token,
 			@RequestParam String classRoomId) {
 		return taskService.getAllTasks(token, classRoomId);
@@ -60,7 +60,7 @@ public class TaskController {
 	}
 
 	// http://localhost:5000/task/update?{classRoomId}
-	@PutMapping("/update")
+	@PutMapping("/updateTask")
 	public Map<String, Object> updateTask(@RequestHeader("Authorization") String token,
 			@RequestParam String classRoomId, @RequestBody Task task) {
 		if (NullCheckerUtils.taskNullChecker(task)) {
@@ -70,7 +70,7 @@ public class TaskController {
 	}
 
 	// http://localhost:5000/task/update?{classRoomId}?{taskId}
-	@PutMapping("/updateImage")
+	@PutMapping("/addImage")
 	public Map<String, Object> updateTaskImage(@RequestHeader("Authorization") String token,
 			@RequestParam String classRoomId, @RequestParam String taskId, @RequestPart MultipartFile file) {
 		return taskService.updateTaskImage(token, classRoomId, taskId);
