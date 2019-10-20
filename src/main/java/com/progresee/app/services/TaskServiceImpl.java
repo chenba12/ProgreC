@@ -54,11 +54,8 @@ public class TaskServiceImpl implements TaskService {
 			Query docRef = firestore.collection("classrooms").document(classroomId).collection("tasks");
 			try {
 				ApiFuture<QuerySnapshot> documentReference = docRef.get();
-				System.out.println("documentReference ->" + documentReference);
 				QuerySnapshot documentSnapshot = documentReference.get();
-				System.out.println("documentSnapshot ->" + documentSnapshot);
 				List<Task> tempTasks = documentSnapshot.toObjects(Task.class);
-				System.out.println("classrooms IN LIST---->" + tempTasks);
 				Map<String, Object> tasks = new Hashtable<>();
 				for (Task task : tempTasks) {
 					tasks.put(task.getUid(), task);
@@ -85,9 +82,7 @@ public class TaskServiceImpl implements TaskService {
 					.document(taskId);
 			try {
 				ApiFuture<DocumentSnapshot> documentReference = docRef.get();
-				System.out.println("documentReference ->" + documentReference);
 				DocumentSnapshot documentSnapshot = documentReference.get();
-				System.out.println("documentSnapshot ->" + documentSnapshot);
 				if (documentSnapshot.exists()) {
 					return documentSnapshot.getData();
 				}
@@ -113,7 +108,7 @@ public class TaskServiceImpl implements TaskService {
 					.document(taskUid).set(task);
 			try {
 				WriteResult writeResult = docRef.get();
-				if (writeResult.getUpdateTime() != null) {
+				if (writeResult!= null) {
 					return getTaskAfterRequest(classroomId, taskUid);
 				}
 			} catch (InterruptedException | ExecutionException e) {
@@ -134,8 +129,9 @@ public class TaskServiceImpl implements TaskService {
 					.document(taskId).delete();
 			try {
 				WriteResult writeResult = docRef.get();
-				System.out.println("writeResult ->" + writeResult);
-				return ResponseUtils.generateSuccessString("Task has been deleted");
+				if (writeResult!=null) {
+					return ResponseUtils.generateSuccessString("Task has been deleted");
+				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
@@ -154,7 +150,7 @@ public class TaskServiceImpl implements TaskService {
 					.document(task.getUid()).set(task);
 			try {
 				WriteResult writeResult = docRef.get();
-				if (writeResult.getUpdateTime() != null) {
+				if (writeResult!= null) {
 					return getTaskAfterRequest(classroomId, task.getUid());
 				}
 			} catch (InterruptedException | ExecutionException e) {
@@ -178,9 +174,7 @@ public class TaskServiceImpl implements TaskService {
 				.document(taskId);
 		try {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
-			System.out.println("documentReference ->" + documentReference);
 			DocumentSnapshot documentSnapshot = documentReference.get();
-			System.out.println("documentSnapshot ->" + documentSnapshot);
 			Task task = documentSnapshot.toObject(Task.class);
 			Map<String, Object> map = new Hashtable<>();
 			map.put(taskId, task);

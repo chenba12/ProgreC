@@ -52,13 +52,11 @@ public class UserServiceImpl implements UserService {
 		Map<String, Object> returnedMap = new Hashtable<>();
 		try {
 			FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
-			System.out.println("decoded token is -> " + decodedToken);
 			String uid = decodedToken.getUid();
 			DocumentReference documentReference = firestore.collection("users").document(uid);
 			ApiFuture<DocumentSnapshot> apiFuture = documentReference.get();
 			DocumentSnapshot documentSnapshot = apiFuture.get();
 			if (documentSnapshot.exists()) {
-				System.out.println("found user " + decodedToken.getName() + "with uid " + decodedToken.getUid());
 				returnedMap.put("signedIn", Calendar.getInstance().getTime());
 				return documentSnapshot.getData();
 			}
@@ -77,7 +75,7 @@ public class UserServiceImpl implements UserService {
 		ApiFuture<WriteResult> docRef = firestore.collection("users").document(uid).set(user);
 		try {
 			WriteResult writeResult = docRef.get();
-			if (writeResult.getUpdateTime() != null) {
+			if (writeResult != null) {
 				return getUserAfterRequest(uid);
 			}
 
@@ -95,9 +93,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			DocumentReference docRef = firestore.collection("classrooms").document(classroomId);
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
-			System.out.println("documentReference ->" + documentReference);
 			DocumentSnapshot documentSnapshot = documentReference.get();
-			System.out.println("documentSnapshot ->" + documentSnapshot);
 			List<String> users = (List<String>) documentSnapshot.get("userList");
 			if (users.contains(uid)) {
 				return documentSnapshot.getData();
@@ -119,11 +115,8 @@ public class UserServiceImpl implements UserService {
 		Query docRef = firestore.collection("classrooms").whereArrayContains("userList", uid);
 		try {
 			ApiFuture<QuerySnapshot> documentReference = docRef.get();
-			System.out.println("documentReference ->" + documentReference);
 			QuerySnapshot documentSnapshot = documentReference.get();
-			System.out.println("documentSnapshot ->" + documentSnapshot);
 			List<Classroom> tempClassrooms = documentSnapshot.toObjects(Classroom.class);
-			System.out.println("classrooms IN LIST---->" + tempClassrooms);
 			Map<String, Object> classrooms = new Hashtable<>();
 			for (Classroom classroom : tempClassrooms) {
 				classrooms.put(classroom.getUid(), classroom);
@@ -178,7 +171,7 @@ public class UserServiceImpl implements UserService {
 
 			try {
 				WriteResult writeResult = docRef.get();
-				if (writeResult.getUpdateTime() != null) {
+				if (writeResult!= null) {
 					return getClassroomAfterRequest(classroomId);
 				}
 
@@ -202,8 +195,9 @@ public class UserServiceImpl implements UserService {
 			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).delete();
 			try {
 				WriteResult writeResult = docRef.get();
-				System.out.println("writeResult ->" + writeResult);
-				return ResponseUtils.generateSuccessString("classroom deleted");
+				if (writeResult != null) {
+					return ResponseUtils.generateSuccessString("classroom deleted");
+				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
@@ -222,9 +216,7 @@ public class UserServiceImpl implements UserService {
 		DocumentReference docRef = firestore.collection("classrooms").document(classroomId);
 		try {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
-			System.out.println("documentReference ->" + documentReference);
 			DocumentSnapshot documentSnapshot = documentReference.get();
-			System.out.println("documentSnapshot ->" + documentSnapshot);
 			if (documentSnapshot.exists()) {
 				List<String> users = (List<String>) documentSnapshot.get("userList");
 				map.clear();
@@ -251,27 +243,26 @@ public class UserServiceImpl implements UserService {
 				DocumentReference docRef = firestore.collection("classrooms").document(classroomId);
 				try {
 					ApiFuture<DocumentSnapshot> documentReference = docRef.get();
-					System.out.println("documentReference ->" + documentReference);
 					DocumentSnapshot documentSnapshot = documentReference.get();
-					System.out.println("documentSnapshot ->" + documentSnapshot);
 					if (documentSnapshot.exists()) {
 						String newOwnerEmail = findUserByUid(newOwnerId);
-							Map<String, Object> newOwnerMap = new Hashtable<>();
-							newOwnerMap.put("owner", newOwnerEmail);
-							newOwnerMap.put("onwerUid", newOwnerId);
-							ApiFuture<WriteResult> reference = firestore.collection("classrooms").document(classroomId)
-									.update(newOwnerMap);
-							WriteResult fuReference = reference.get();
-							if (fuReference.getUpdateTime() != null) {
-								return ResponseUtils.generateSuccessString("transfer successfull");
-							}
+						Map<String, Object> newOwnerMap = new Hashtable<>();
+						newOwnerMap.put("owner", newOwnerEmail);
+						newOwnerMap.put("onwerUid", newOwnerId);
+						ApiFuture<WriteResult> reference = firestore.collection("classrooms").document(classroomId)
+								.update(newOwnerMap);
+						WriteResult writeResult = reference.get();
+						if (writeResult != null) {
+							return ResponseUtils.generateSuccessString("transfer successfull");
 						}
+					}
 				} catch (InterruptedException | ExecutionException e) {
 					e.printStackTrace();
 				}
 			}
 			response.setStatus(ResponseUtils.BAD_REQUEST);
-			return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.USER_NOT_PART_OF_CLASSROOM, "/transferClassroom");
+			return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.USER_NOT_PART_OF_CLASSROOM,
+					"/transferClassroom");
 		}
 		response.setStatus(ResponseUtils.FORBIDDEN);
 		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.OWNER, "/transferClassroom");
@@ -287,8 +278,9 @@ public class UserServiceImpl implements UserService {
 					FieldValue.arrayUnion(userId));
 			try {
 				WriteResult writeResult = docRef.get();
-				System.out.println("writeResult ->" + writeResult);
-				return ResponseUtils.generateSuccessString("Added user sucessfully");
+				if (writeResult != null) {
+					return ResponseUtils.generateSuccessString("Added user sucessfully");
+				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
@@ -308,8 +300,9 @@ public class UserServiceImpl implements UserService {
 					FieldValue.arrayRemove(uid));
 			try {
 				WriteResult writeResult = docRef.get();
-				System.out.println("writeResult ->" + writeResult);
-				return ResponseUtils.generateSuccessString("You left the classroom sucessfully");
+				if (writeResult != null) {
+					return ResponseUtils.generateSuccessString("You left the classroom sucessfully");
+				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
@@ -331,7 +324,7 @@ public class UserServiceImpl implements UserService {
 					ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId)
 							.update("userList", FieldValue.arrayRemove(userId));
 					WriteResult writeResult = docRef.get();
-					if (writeResult.getUpdateTime() != null) {
+					if (writeResult != null) {
 						return ResponseUtils.generateSuccessString("Removed user sucessfully");
 					}
 				}
@@ -351,15 +344,12 @@ public class UserServiceImpl implements UserService {
 
 		try {
 			FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
-			System.out.println("decoded token is -> " + decodedToken);
 			String uid = decodedToken.getUid();
 			Map<String, Object> returnedMap = new Hashtable<>();
 			DocumentReference documentReference = firestore.collection("users").document(uid);
 			ApiFuture<DocumentSnapshot> apiFuture = documentReference.get();
 			DocumentSnapshot documentSnapshot = apiFuture.get();
 			if (documentSnapshot.exists()) {
-				System.out.println("found user " + decodedToken.getName() + "with uid " + decodedToken.getUid());
-				returnedMap.put("signedIn", FieldValue.serverTimestamp());
 				ApiFuture<WriteResult> updatedDocumentReference = firestore.collection("users").document(uid)
 						.update(returnedMap);
 				if (updatedDocumentReference != null) {
@@ -395,9 +385,7 @@ public class UserServiceImpl implements UserService {
 		DocumentReference docRef = firestore.collection("classrooms").document(uid);
 		try {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
-			System.out.println("documentReference ->" + documentReference);
 			DocumentSnapshot documentSnapshot = documentReference.get();
-			System.out.println("documentSnapshot ->" + documentSnapshot);
 			if (documentSnapshot.exists()) {
 				Classroom classroom = documentSnapshot.toObject(Classroom.class);
 				Map<String, Object> map = new Hashtable<>();
@@ -416,9 +404,7 @@ public class UserServiceImpl implements UserService {
 		DocumentReference docRef = firestore.collection("users").document(uid);
 		try {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
-			System.out.println("documentReference ->" + documentReference);
 			DocumentSnapshot documentSnapshot = documentReference.get();
-			System.out.println("documentSnapshot ->" + documentSnapshot);
 			Classroom classroom = documentSnapshot.toObject(Classroom.class);
 			Map<String, Object> map = new Hashtable<>();
 			map.put(uid, classroom);
@@ -447,9 +433,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			DocumentReference docRef = firestore.collection("classrooms").document(classroomId);
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
-			System.out.println("documentReference ->" + documentReference);
 			DocumentSnapshot documentSnapshot = documentReference.get();
-			System.out.println("documentSnapshot ->" + documentSnapshot);
 			String ownerUid = (String) documentSnapshot.get("ownerUid");
 			if (ownerUid.equalsIgnoreCase(uid)) {
 				return true;
@@ -464,9 +448,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			DocumentReference docRef = firestore.collection("classrooms").document(classroomId);
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
-			System.out.println("documentReference ->" + documentReference);
 			DocumentSnapshot documentSnapshot = documentReference.get();
-			System.out.println("documentSnapshot ->" + documentSnapshot);
 			List<String> users = (List<String>) documentSnapshot.get("userList");
 			if (users.size() > 0 && users.contains(uid)) {
 				return true;
