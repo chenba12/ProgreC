@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.google.api.core.ApiFuture;
+import com.google.cloud.Date;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldValue;
@@ -48,8 +49,6 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Map<String, Object> getUser(String token) {
-
-		Map<String, Object> returnedMap = new Hashtable<>();
 		try {
 			FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
 			String uid = decodedToken.getUid();
@@ -57,7 +56,6 @@ public class UserServiceImpl implements UserService {
 			ApiFuture<DocumentSnapshot> apiFuture = documentReference.get();
 			DocumentSnapshot documentSnapshot = apiFuture.get();
 			if (documentSnapshot.exists()) {
-				returnedMap.put("signedIn", Calendar.getInstance().getTime());
 				return documentSnapshot.getData();
 			}
 
@@ -168,10 +166,9 @@ public class UserServiceImpl implements UserService {
 		if (checkOwnerShip(classroomId, uid)) {
 			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).update("name",
 					classroomName);
-
 			try {
 				WriteResult writeResult = docRef.get();
-				if (writeResult!= null) {
+				if (writeResult != null) {
 					return getClassroomAfterRequest(classroomId);
 				}
 
@@ -196,7 +193,7 @@ public class UserServiceImpl implements UserService {
 			try {
 				WriteResult writeResult = docRef.get();
 				if (writeResult != null) {
-					return ResponseUtils.generateSuccessString("classroom deleted");
+					return ResponseUtils.generateSuccessString(classroomId);
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
@@ -212,6 +209,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Map<String, Object> getUsersInClassroom(String token, String classroomId) {
 		Map<String, Object> map = findCurrentUser(token);
+		Map<String, Object> userMap=new Hashtable<>();
 		System.out.println("map -> " + map);
 		DocumentReference docRef = firestore.collection("classrooms").document(classroomId);
 		try {
@@ -219,11 +217,16 @@ public class UserServiceImpl implements UserService {
 			DocumentSnapshot documentSnapshot = documentReference.get();
 			if (documentSnapshot.exists()) {
 				List<String> users = (List<String>) documentSnapshot.get("userList");
-				map.clear();
-				for (int i = 0; i < users.size(); i++) {
-					map.put(String.valueOf(i), users.get(i));
+				for (String user : users) {
+					System.out.println(user);
+					DocumentReference docRef2 = firestore.collection("users").document(user);
+					ApiFuture<DocumentSnapshot> documentReference2 = docRef2.get();
+					DocumentSnapshot documentSnapshot2 = documentReference2.get();
+					if (documentSnapshot2.exists()) {
+						userMap.put(user, documentSnapshot2.getData());
+					}
 				}
-				return map;
+				return userMap;
 			}
 			response.setStatus(ResponseUtils.BAD_REQUEST);
 			return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, "Error", "/getUsersInClassroom");
@@ -341,23 +344,22 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Map<String, Object> findCurrentUser(String token) {
-
 		try {
 			FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
 			String uid = decodedToken.getUid();
-			Map<String, Object> returnedMap = new Hashtable<>();
+			Map<String, Object> map = new Hashtable<>();
 			DocumentReference documentReference = firestore.collection("users").document(uid);
 			ApiFuture<DocumentSnapshot> apiFuture = documentReference.get();
 			DocumentSnapshot documentSnapshot = apiFuture.get();
+			map.put("signedIn", Calendar.getInstance().getTime());
 			if (documentSnapshot.exists()) {
 				ApiFuture<WriteResult> updatedDocumentReference = firestore.collection("users").document(uid)
-						.update(returnedMap);
+						.update(map);
 				if (updatedDocumentReference != null) {
-					System.out.println("new sign in time " + updatedDocumentReference);
-					returnedMap.clear();
-					returnedMap.put("uid", uid);
-					returnedMap.put("email", documentSnapshot.getData().get("email"));
-					return returnedMap;
+					map.clear();
+					map.put("uid", uid);
+					map.put("email", documentSnapshot.getData().get("email"));
+					return map;
 				}
 			} else {
 				User user = new User();
@@ -366,13 +368,14 @@ public class UserServiceImpl implements UserService {
 				user.setFullName(decodedToken.getName());
 				user.setEmail(decodedToken.getEmail());
 				user.setProfilePictureUrl(decodedToken.getPicture());
+				user.setUid(uid);
 				ApiFuture<WriteResult> docRef = firestore.collection("users").document(uid).set(user);
 				if (docRef != null) {
 					System.out.println("user added " + user);
-					returnedMap.clear();
-					returnedMap.put("uid", uid);
-					returnedMap.put("email", decodedToken.getEmail());
-					return returnedMap;
+					map.clear();
+					map.put("uid", uid);
+					map.put("email", decodedToken.getEmail());
+					return map;
 				}
 			}
 		} catch (FirebaseAuthException | InterruptedException | ExecutionException e) {
@@ -458,4 +461,6 @@ public class UserServiceImpl implements UserService {
 		}
 		return false;
 	}
+
+	
 }
