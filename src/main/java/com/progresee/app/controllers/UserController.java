@@ -88,8 +88,8 @@ public class UserController {
 	// http://localhost:5000/user/addToClassroom
 	@PutMapping("addToClassroom")
 	public Map<String, Object> addToClassroom(@RequestHeader("Authorization") String token,
-			@RequestParam String classroomId, @RequestParam String userId) {
-		return service.addToClassroom(token, classroomId, userId);
+			@RequestParam String classroomId, @RequestParam String email) {
+		return service.addToClassroom(token, classroomId, email);
 	}
 
 	// http://localhost:5000/user/leaveClassroom

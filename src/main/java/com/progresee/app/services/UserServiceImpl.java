@@ -18,6 +18,7 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -209,7 +210,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Map<String, Object> getUsersInClassroom(String token, String classroomId) {
 		Map<String, Object> map = findCurrentUser(token);
-		Map<String, Object> userMap=new Hashtable<>();
+		Map<String, Object> userMap = new Hashtable<>();
 		System.out.println("map -> " + map);
 		DocumentReference docRef = firestore.collection("classrooms").document(classroomId);
 		try {
@@ -251,12 +252,12 @@ public class UserServiceImpl implements UserService {
 						String newOwnerEmail = findUserByUid(newOwnerId);
 						Map<String, Object> newOwnerMap = new Hashtable<>();
 						newOwnerMap.put("owner", newOwnerEmail);
-						newOwnerMap.put("onwerUid", newOwnerId);
+						newOwnerMap.put("ownerUid", newOwnerId);
 						ApiFuture<WriteResult> reference = firestore.collection("classrooms").document(classroomId)
 								.update(newOwnerMap);
 						WriteResult writeResult = reference.get();
 						if (writeResult != null) {
-							return ResponseUtils.generateSuccessString("transfer successfull");
+							return getClassroomAfterRequest(classroomId);
 						}
 					}
 				} catch (InterruptedException | ExecutionException e) {
@@ -272,25 +273,35 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Map<String, Object> addToClassroom(String token, String classroomId, String userId) {
+	public Map<String, Object> addToClassroom(String token, String classroomId, String email) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (checkOwnerShip(classroomId, uid)) {
-			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).update("userList",
-					FieldValue.arrayUnion(userId));
+			Query query = firestore.collection("users").whereEqualTo("email", email);
 			try {
-				WriteResult writeResult = docRef.get();
-				if (writeResult != null) {
-					return ResponseUtils.generateSuccessString("Added user sucessfully");
+				QuerySnapshot querySnapshot = query.get().get();
+				List<QueryDocumentSnapshot> list = querySnapshot.getDocuments();
+				if (list.size() > 0) {
+					QueryDocumentSnapshot user = list.get(0);
+					String userUid = (String) user.get("uid");
+					System.out.println(userUid+" uid");
+					ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId)
+							.update("userList", FieldValue.arrayUnion(userUid));
+
+					WriteResult writeResult = docRef.get();
+					if (writeResult != null) {
+						return getClassroomAfterRequest(classroomId);
+					}
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
-
 		}
+
 		response.setStatus(ResponseUtils.FORBIDDEN);
 		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.OWNER, "/addToClassroom");
+
 	}
 
 	@Override
@@ -328,7 +339,7 @@ public class UserServiceImpl implements UserService {
 							.update("userList", FieldValue.arrayRemove(userId));
 					WriteResult writeResult = docRef.get();
 					if (writeResult != null) {
-						return ResponseUtils.generateSuccessString("Removed user sucessfully");
+						return getClassroomAfterRequest(classroomId);
 					}
 				}
 				response.setStatus(ResponseUtils.BAD_REQUEST);
@@ -462,5 +473,4 @@ public class UserServiceImpl implements UserService {
 		return false;
 	}
 
-	
 }
