@@ -133,13 +133,15 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Map<String, Object> createClassroom(String token, String classroomName) {
+	public Map<String, Object> createClassroom(String token, String classroomName,String description) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		String owner = (String) map.get("email");
 		Classroom classroom = new Classroom();
 		classroom.setName(classroomName);
+		classroom.setDescription(description);
+		classroom.setNumberOfTasks(0);
 		classroom.setOwner(owner);
 		classroom.setDateCreated(Calendar.getInstance().getTime());
 		classroom.getUserList().add(uid);
@@ -160,13 +162,15 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Map<String, Object> updateClassroom(String token, String classroomId, String classroomName) {
+	public Map<String, Object> updateClassroom(String token, String classroomId, String classroomName, String description) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
+		map.clear();
+		map.put("name", classroomId);
+		map.put("description", description);
 		if (checkOwnerShip(classroomId, uid)) {
-			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).update("name",
-					classroomName);
+			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).update(map);
 			try {
 				WriteResult writeResult = docRef.get();
 				if (writeResult != null) {

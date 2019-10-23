@@ -15,9 +15,9 @@ public interface UserService {
 
 	public Map<String, Object> getClassrooms(String token);
 
-	public Map<String, Object> createClassroom(String token, String classroomName);
-
-	public Map<String, Object> updateClassroom(String token, String classroomId, String classroomName);
+	Map<String, Object> createClassroom(String token, String classroomName, String description);
+	
+	Map<String, Object> updateClassroom(String token, String classroomId, String classroomName, String description);
 
 	public Map<String, Object> deleteClassroom(String token, String classroomId);
 
@@ -32,6 +32,10 @@ public interface UserService {
 	public Map<String, Object> findCurrentUser(String token);
 
 	public Map<String, Object> removeFromClassroom(String token, String classroomId, String userId);
+
+	
+
+
 
 	
 }

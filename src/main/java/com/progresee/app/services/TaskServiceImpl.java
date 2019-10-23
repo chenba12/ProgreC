@@ -51,7 +51,7 @@ public class TaskServiceImpl implements TaskService {
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkIfUserIsPartOfClassroom(classroomId, uid)) {
-			Query docRef = firestore.collection("classrooms").document(classroomId).collection("tasks");
+			Query docRef = firestore.collection("tasks");
 			try {
 				ApiFuture<QuerySnapshot> documentReference = docRef.get();
 				QuerySnapshot documentSnapshot = documentReference.get();
@@ -78,7 +78,7 @@ public class TaskServiceImpl implements TaskService {
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkIfUserIsPartOfClassroom(classroomId, uid)) {
-			DocumentReference docRef = firestore.collection("classrooms").document(classroomId).collection("tasks")
+			DocumentReference docRef = firestore.collection("tasks")
 					.document(taskId);
 			try {
 				ApiFuture<DocumentSnapshot> documentReference = docRef.get();
@@ -104,7 +104,7 @@ public class TaskServiceImpl implements TaskService {
 			task.setStartDate(Calendar.getInstance().getTime());
 			String taskUid = UUID.randomUUID().toString().replace("-", "");
 			task.setUid(taskUid);
-			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).collection("tasks")
+			ApiFuture<WriteResult> docRef = firestore.collection("tasks")
 					.document(taskUid).set(task);
 			try {
 				WriteResult writeResult = docRef.get();
@@ -125,7 +125,7 @@ public class TaskServiceImpl implements TaskService {
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkOwnerShip(classroomId, uid)) {
-			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).collection("tasks")
+			ApiFuture<WriteResult> docRef = firestore.collection("tasks")
 					.document(taskId).delete();
 			try {
 				WriteResult writeResult = docRef.get();
@@ -146,7 +146,7 @@ public class TaskServiceImpl implements TaskService {
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkOwnerShip(classroomId, uid)) {
-			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).collection("tasks")
+			ApiFuture<WriteResult> docRef = firestore.collection("tasks")
 					.document(task.getUid()).set(task);
 			try {
 				WriteResult writeResult = docRef.get();
@@ -170,7 +170,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	private Map<String, Object> getTaskAfterRequest(String classroomId, String taskId) {
-		DocumentReference docRef = firestore.collection("classrooms").document(classroomId).collection("tasks")
+		DocumentReference docRef = firestore.collection("tasks")
 				.document(taskId);
 		try {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();

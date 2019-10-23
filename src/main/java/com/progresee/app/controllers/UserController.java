@@ -56,14 +56,14 @@ public class UserController {
 	// http://localhost:5000/user/createClassroom
 	@PostMapping("/createClassroom")
 	public Map<String, Object> createClassroom(@RequestHeader("Authorization") String token,
-			@RequestParam String name) {
-		return service.createClassroom(token, name);
+			@RequestParam String name,@RequestParam String description) {
+		return service.createClassroom(token, name,description);
 	}
 
 	@PutMapping("/updateClassroom")
 	public Map<String, Object> updateClassroom(@RequestHeader("Authorization") String token,
-			@RequestParam String classroomId, @RequestParam String name) {
-		return service.updateClassroom(token, classroomId, name);
+			@RequestParam String classroomId, @RequestParam String name,@RequestParam String description) {
+		return service.updateClassroom(token, classroomId, name,description);
 
 	}
 
