@@ -136,6 +136,7 @@ public class UserServiceImpl implements UserService {
 	public Map<String, Object> createClassroom(String token, String classroomName,String description) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
+		System.out.println(description);
 		String uid = (String) map.get("uid");
 		String owner = (String) map.get("email");
 		Classroom classroom = new Classroom();

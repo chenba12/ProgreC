@@ -15,5 +15,6 @@ public class Exercise {
 	private String exerciseTitle;
 	private Date dateCreated;
 	private List<String> usrsFinishedList;
+	private String taskUid;
 
 }

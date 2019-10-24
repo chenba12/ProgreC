@@ -59,7 +59,7 @@ public class ExerciseController {
 	}
 
 	// http://localhost:5000/exercise/update?{classRoomId}/{taskId}
-	@PutMapping("/update")
+	@PutMapping("/updateExercise")
 	public Map<String, Object> updateExercise(@RequestHeader("Authorization") String token,@RequestParam String classRoomId, @RequestParam String taskId,
 			@RequestBody Exercise exercise) {
 		return exerciseService.updateExercise(token,classRoomId, taskId, exercise);
@@ -67,7 +67,7 @@ public class ExerciseController {
 
 	// http://localhost:5000/exercise/updateStatus?{classRoomId}/{taskId}
 	@PutMapping("updateStatus")
-	public Map<String, Object> updateExerciseStatus(@RequestHeader("Authorization") String token,@RequestParam String classRoomId, @RequestParam String taskId,
+	public Map<String, Object> updateStatus(@RequestHeader("Authorization") String token,@RequestParam String classRoomId, @RequestParam String taskId,
 			@RequestParam String exerciseId) {
 		return exerciseService.updateStatus(token,classRoomId, taskId, exerciseId);
 	}
