@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.google.api.core.ApiFuture;
-import com.google.cloud.Date;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldValue;
@@ -144,6 +143,7 @@ public class UserServiceImpl implements UserService {
 		classroom.setDescription(description);
 		classroom.setNumberOfTasks(0);
 		classroom.setOwner(owner);
+		classroom.setNumberOfUsers(1);
 		classroom.setDateCreated(Calendar.getInstance().getTime());
 		classroom.getUserList().add(uid);
 		classroom.setOwnerUid(uid);
@@ -280,6 +280,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Map<String, Object> addToClassroom(String token, String classroomId, String email) {
 		Map<String, Object> map = findCurrentUser(token);
+		Map<String, Object> valuesMap=new Hashtable<>();
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (checkOwnerShip(classroomId, uid)) {
@@ -291,9 +292,10 @@ public class UserServiceImpl implements UserService {
 					QueryDocumentSnapshot user = list.get(0);
 					String userUid = (String) user.get("uid");
 					System.out.println(userUid+" uid");
+					valuesMap.put("userList", FieldValue.arrayUnion(userUid));
+					valuesMap.put("numberOfUsers", FieldValue.increment(1));
 					ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId)
-							.update("userList", FieldValue.arrayUnion(userUid));
-
+							.update(valuesMap);
 					WriteResult writeResult = docRef.get();
 					if (writeResult != null) {
 						return getClassroomAfterRequest(classroomId);
@@ -312,11 +314,13 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Map<String, Object> leaveClassroom(String token, String classroomId) {
 		Map<String, Object> map = findCurrentUser(token);
+		Map<String, Object> valuesMap=new Hashtable<>();
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (checkIfUserIsPartOfClassroom(classroomId, uid)) {
-			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).update("userList",
-					FieldValue.arrayRemove(uid));
+			valuesMap.put("userList", FieldValue.arrayRemove(uid));
+			valuesMap.put("numberOfUsers", FieldValue.increment(-1));
+			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).update(valuesMap);
 			try {
 				WriteResult writeResult = docRef.get();
 				if (writeResult != null) {
@@ -335,13 +339,16 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Map<String, Object> removeFromClassroom(String token, String classroomId, String userId) {
 		Map<String, Object> map = findCurrentUser(token);
+		Map<String, Object> valuesMap=new Hashtable<>();
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (checkOwnerShip(classroomId, uid)) {
 			try {
 				if (checkIfUserIsPartOfClassroom(classroomId, userId)) {
+					valuesMap.put("userList", FieldValue.arrayRemove(userId));
+					valuesMap.put("numberOfUsers", FieldValue.increment(-1));
 					ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId)
-							.update("userList", FieldValue.arrayRemove(userId));
+							.update(valuesMap);
 					WriteResult writeResult = docRef.get();
 					if (writeResult != null) {
 						return getClassroomAfterRequest(classroomId);

@@ -17,6 +17,7 @@ public class Classroom {
 	private String description;
 	private int numberOfTasks;
 	private Date dateCreated;
+	private int numberOfUsers;
 	private List<String> userList = new ArrayList<String>();
 	private String ownerUid;
 	private String uid;

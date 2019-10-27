@@ -18,6 +18,7 @@ public class Task {
 	private Date startDate;
 	private Date endDate;
 	private String classroomUid;
+	private boolean status;
 	
 
 }

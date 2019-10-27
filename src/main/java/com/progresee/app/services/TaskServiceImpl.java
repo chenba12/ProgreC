@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QuerySnapshot;
@@ -51,7 +52,7 @@ public class TaskServiceImpl implements TaskService {
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkIfUserIsPartOfClassroom(classroomId, uid)) {
-			Query docRef = firestore.collection("tasks");
+			Query docRef = firestore.collection("tasks").whereEqualTo("classroomUid", classroomId);
 			try {
 				ApiFuture<QuerySnapshot> documentReference = docRef.get();
 				QuerySnapshot documentSnapshot = documentReference.get();
@@ -68,7 +69,8 @@ public class TaskServiceImpl implements TaskService {
 
 		}
 		response.setStatus(ResponseUtils.BAD_REQUEST);
-		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM, "/getAllTasks");
+		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM,
+				"/getAllTasks");
 
 	}
 
@@ -78,8 +80,7 @@ public class TaskServiceImpl implements TaskService {
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkIfUserIsPartOfClassroom(classroomId, uid)) {
-			DocumentReference docRef = firestore.collection("tasks")
-					.document(taskId);
+			DocumentReference docRef = firestore.collection("tasks").document(taskId);
 			try {
 				ApiFuture<DocumentSnapshot> documentReference = docRef.get();
 				DocumentSnapshot documentSnapshot = documentReference.get();
@@ -91,7 +92,8 @@ public class TaskServiceImpl implements TaskService {
 			}
 		}
 		response.setStatus(ResponseUtils.BAD_REQUEST);
-		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM, "/getAllTasks");
+		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM,
+				"/getAllTasks");
 	}
 
 	@Override
@@ -100,16 +102,21 @@ public class TaskServiceImpl implements TaskService {
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkOwnerShip(classroomId, uid)) {
-			task.setTitle(task.getTitle());
 			task.setStartDate(Calendar.getInstance().getTime());
 			String taskUid = UUID.randomUUID().toString().replace("-", "");
 			task.setUid(taskUid);
-			ApiFuture<WriteResult> docRef = firestore.collection("tasks")
-					.document(taskUid).set(task);
+			task.setClassroomUid(classroomId);
+			task.setStatus(true);
+			ApiFuture<WriteResult> docRef = firestore.collection("tasks").document(taskUid).set(task);
 			try {
 				WriteResult writeResult = docRef.get();
-				if (writeResult!= null) {
-					return getTaskAfterRequest(classroomId, taskUid);
+				if (writeResult != null) {
+					ApiFuture<WriteResult> addTask = firestore.collection("classrooms").document(classroomId)
+							.update("numberOfTasks", FieldValue.increment(1));
+					WriteResult addTaskResult = addTask.get();
+					if (addTaskResult != null) {
+						return getTaskAfterRequest(classroomId, taskUid);
+					}
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
@@ -125,19 +132,23 @@ public class TaskServiceImpl implements TaskService {
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkOwnerShip(classroomId, uid)) {
-			ApiFuture<WriteResult> docRef = firestore.collection("tasks")
-					.document(taskId).delete();
+			ApiFuture<WriteResult> docRef = firestore.collection("tasks").document(taskId).delete();
 			try {
 				WriteResult writeResult = docRef.get();
-				if (writeResult!=null) {
-					return ResponseUtils.generateSuccessString("Task has been deleted");
+				if (writeResult != null) {
+					ApiFuture<WriteResult> removeTask = firestore.collection("classrooms").document(classroomId)
+							.update("numberOfTasks", FieldValue.increment(-1));
+					WriteResult removeTaskResult = removeTask.get();
+					if (removeTaskResult!=null) {
+						return ResponseUtils.generateSuccessString("Task has been deleted");
+					}
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
 		}
 		response.setStatus(ResponseUtils.FORBIDDEN);
-		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.OWNER, "/createTask");
+		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.OWNER, "/deleteTask");
 	}
 
 	@Override
@@ -146,11 +157,10 @@ public class TaskServiceImpl implements TaskService {
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkOwnerShip(classroomId, uid)) {
-			ApiFuture<WriteResult> docRef = firestore.collection("tasks")
-					.document(task.getUid()).set(task);
+			ApiFuture<WriteResult> docRef = firestore.collection("tasks").document(task.getUid()).set(task);
 			try {
 				WriteResult writeResult = docRef.get();
-				if (writeResult!= null) {
+				if (writeResult != null) {
 					return getTaskAfterRequest(classroomId, task.getUid());
 				}
 			} catch (InterruptedException | ExecutionException e) {
@@ -158,8 +168,8 @@ public class TaskServiceImpl implements TaskService {
 			}
 		}
 		response.setStatus(ResponseUtils.FORBIDDEN);
-		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.OWNER, "/createTask");
-		
+		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.OWNER, "/updateTask");
+
 	}
 
 	// Todo finish this with android
@@ -170,8 +180,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	private Map<String, Object> getTaskAfterRequest(String classroomId, String taskId) {
-		DocumentReference docRef = firestore.collection("tasks")
-				.document(taskId);
+		DocumentReference docRef = firestore.collection("tasks").document(taskId);
 		try {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
 			DocumentSnapshot documentSnapshot = documentReference.get();

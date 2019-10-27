@@ -6,6 +6,7 @@ import java.util.Map;
 public class ResponseUtils {
 	public static final String USER_NOT_FOUND = "Could not find user";
 	public static final String NOT_PART_OF_CLASSROOM = "You are not a part of this classroom";
+	public static final String ERROR="Error";
 	public static final String USER_NOT_PART_OF_CLASSROOM = "User is a not part of this classroom";
 	public static final String OWNER = "You are not the owner of the classroom";
 	public static final int BAD_REQUEST = 400;
