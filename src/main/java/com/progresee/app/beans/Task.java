@@ -13,7 +13,6 @@ public class Task {
 	private String uid;
 	private String title;
 	private String description;
-	private String imageUrl;
 	private String referenceLink;
 	private Date startDate;
 	private Date endDate;

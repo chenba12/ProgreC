@@ -16,7 +16,4 @@ public interface TaskService {
 
 	public Map<String, Object> updateTask(String token, String classroomId, Task task);
 
-	// TODO wait for android
-	Map<String, Object> updateTaskImage(String token, String classroomId, String taskId);
-
 }

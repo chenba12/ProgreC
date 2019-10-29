@@ -172,12 +172,7 @@ public class TaskServiceImpl implements TaskService {
 
 	}
 
-	// Todo finish this with android
-	@Override
-	public Map<String, Object> updateTaskImage(String token, String classroomId, String taskId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 
 	private Map<String, Object> getTaskAfterRequest(String classroomId, String taskId) {
 		DocumentReference docRef = firestore.collection("tasks").document(taskId);

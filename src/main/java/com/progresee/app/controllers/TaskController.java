@@ -69,10 +69,4 @@ public class TaskController {
 		return null;
 	}
 
-	// http://localhost:5000/task/update?{classRoomId}?{taskId}
-	@PutMapping("/addImage")
-	public Map<String, Object> updateTaskImage(@RequestHeader("Authorization") String token,
-			@RequestParam String classRoomId, @RequestParam String taskId, @RequestPart MultipartFile file) {
-		return taskService.updateTaskImage(token, classRoomId, taskId);
-	}
 }
