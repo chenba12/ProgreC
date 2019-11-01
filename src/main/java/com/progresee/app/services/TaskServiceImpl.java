@@ -15,12 +15,14 @@ import com.progresee.app.beans.Task;
 import com.progresee.app.services.dao.TaskService;
 import com.progresee.app.utils.ResponseUtils;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -118,7 +120,10 @@ public class TaskServiceImpl implements TaskService {
 			if (link!=null) {
 				task.setReferenceLink(link);	
 			}
+			
 			Date formatedDate=new SimpleDateFormat("dd/MM/yyyy").parse(date);  
+			
+			
 			task.setEndDate(formatedDate);
 			ApiFuture<WriteResult> docRef = firestore.collection("tasks").document(taskUid).set(task);
 				WriteResult writeResult = docRef.get();
