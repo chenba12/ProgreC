@@ -99,16 +99,18 @@ public class ExerciseServiceImpl implements ExerciseService {
 	}
 
 	@Override
-	public Map<String, Object> createExercise(String token, String classroomId, String taskId, Exercise exercise) {
+	public Map<String, Object> createExercise(String token, String classroomId, String taskId, String description) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkOwnerShip(classroomId, uid)) {
+			Exercise exercise = new Exercise();
 			exercise.setDateCreated(Calendar.getInstance().getTime());
 			exercise.setTaskUid(taskId);
 			exercise.setUsersFinishedList(new ArrayList<String>());
 			String exerciseUid = UUID.randomUUID().toString().replace("-", "");
 			exercise.setUid(exerciseUid);
+			exercise.setExerciseTitle(description);
 			ApiFuture<WriteResult> docRef = firestore.collection("exercises").document(exerciseUid).set(exercise);
 			try {
 				WriteResult writeResult = docRef.get();
