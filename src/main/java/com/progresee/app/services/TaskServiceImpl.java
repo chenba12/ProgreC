@@ -101,7 +101,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
-	public Map<String, Object> createTask(String token, String classroomId, String title,String description,String date) {
+	public Map<String, Object> createTask(String token, String classroomId, String title,String description,String link,String date) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
@@ -115,6 +115,9 @@ public class TaskServiceImpl implements TaskService {
 			task.setStatus(true);
 			task.setTitle(title);
 			task.setDescription(description);
+			if (link!=null) {
+				task.setReferenceLink(link);	
+			}
 			Date formatedDate=new SimpleDateFormat("dd/MM/yyyy").parse(date);  
 			task.setEndDate(formatedDate);
 			ApiFuture<WriteResult> docRef = firestore.collection("tasks").document(taskUid).set(task);

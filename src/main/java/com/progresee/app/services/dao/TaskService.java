@@ -14,6 +14,7 @@ public interface TaskService {
 
 	public Map<String, Object> updateTask(String token, String classroomId, Task task);
 
-	public Map<String, Object> createTask(String token, String classroomId, String title, String description, String date);
+	public Map<String, Object> createTask(String token, String classroomId, String title, String description, String link,
+			String date);
 
 }
