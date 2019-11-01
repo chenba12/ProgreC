@@ -106,7 +106,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 		if (userService.checkOwnerShip(classroomId, uid)) {
 			exercise.setDateCreated(Calendar.getInstance().getTime());
 			exercise.setTaskUid(taskId);
-			exercise.setUsrsFinishedList(new ArrayList<String>());
+			exercise.setUsersFinishedList(new ArrayList<String>());
 			String exerciseUid = UUID.randomUUID().toString().replace("-", "");
 			exercise.setUid(exerciseUid);
 			ApiFuture<WriteResult> docRef = firestore.collection("exercises").document(exerciseUid).set(exercise);
@@ -162,7 +162,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
-			ApiFuture<WriteResult> docRef = firestore.collection("tasks").document(exerciseId).update("usrsFinishedList",FieldValue.arrayUnion(uid));
+			ApiFuture<WriteResult> docRef = firestore.collection("tasks").document(exerciseId).update("usersFinishedList",FieldValue.arrayUnion(uid));
 			try {
 				WriteResult writeResult = docRef.get();
 				if (writeResult != null) {

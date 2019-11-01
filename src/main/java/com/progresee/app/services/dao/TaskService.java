@@ -10,10 +10,10 @@ public interface TaskService {
 
 	public Map<String, Object> getTask(String token, String classroomId, String taskId);
 
-	public Map<String, Object> createTask(String token, String classroomId, Task task);
-
 	public Map<String, Object> deleteTask(String token, String classroomId, String taskId);
 
 	public Map<String, Object> updateTask(String token, String classroomId, Task task);
+
+	public Map<String, Object> createTask(String token, String classroomId, String title, String description, String date);
 
 }

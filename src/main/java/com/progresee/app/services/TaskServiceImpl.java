@@ -14,7 +14,11 @@ import com.google.cloud.firestore.WriteResult;
 import com.progresee.app.beans.Task;
 import com.progresee.app.services.dao.TaskService;
 import com.progresee.app.utils.ResponseUtils;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -97,18 +101,23 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
-	public Map<String, Object> createTask(String token, String classroomId, Task task) {
+	public Map<String, Object> createTask(String token, String classroomId, String title,String description,String date) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkOwnerShip(classroomId, uid)) {
+			try {
+			Task task=new Task();
 			task.setStartDate(Calendar.getInstance().getTime());
 			String taskUid = UUID.randomUUID().toString().replace("-", "");
 			task.setUid(taskUid);
 			task.setClassroomUid(classroomId);
 			task.setStatus(true);
+			task.setTitle(title);
+			task.setDescription(description);
+			Date formatedDate=new SimpleDateFormat("dd/MM/yyyy").parse(date);  
+			task.setEndDate(formatedDate);
 			ApiFuture<WriteResult> docRef = firestore.collection("tasks").document(taskUid).set(task);
-			try {
 				WriteResult writeResult = docRef.get();
 				if (writeResult != null) {
 					ApiFuture<WriteResult> addTask = firestore.collection("classrooms").document(classroomId)
@@ -118,7 +127,7 @@ public class TaskServiceImpl implements TaskService {
 						return getTaskAfterRequest(classroomId, taskUid);
 					}
 				}
-			} catch (InterruptedException | ExecutionException e) {
+			} catch (InterruptedException | ExecutionException | ParseException e) {
 				e.printStackTrace();
 			}
 		}

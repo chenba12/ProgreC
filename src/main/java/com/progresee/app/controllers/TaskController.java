@@ -44,11 +44,8 @@ public class TaskController {
 	// http://localhost:5000/task/createTask?{classRoomId}
 	@PostMapping("/createTask")
 	public Map<String, Object> createTask(@RequestHeader("Authorization") String token,
-			@RequestParam String classRoomId, @RequestBody Task task) {
-		if (NullCheckerUtils.taskNullChecker(task)) {
-			return taskService.createTask(token, classRoomId, task);
-		}
-		return null;
+			@RequestParam String classRoomId, @RequestParam String title,@RequestParam String description,@RequestParam String date) {
+			return taskService.createTask(token, classRoomId,title,description,date);
 
 	}
 
