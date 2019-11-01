@@ -47,8 +47,8 @@ public class ExerciseController {
 	// http://localhost:5000/exercise/createExercise?{classRoomId}/{taskId}
 	@PostMapping("/createExercise")
 	public Map<String, Object> createExercise(@RequestHeader("Authorization") String token,@RequestParam String classRoomId, @RequestParam String taskId,
-			@RequestBody Exercise exercise) {
-		return exerciseService.createExercise(token,classRoomId, taskId, exercise);
+			@RequestParam String description) {
+		return exerciseService.createExercise(token,classRoomId, taskId, description);
 	}
 
 	// http://localhost:5000/exercise/deleteExercise?{classRoomId}/{taskId}/{exerciseId}
