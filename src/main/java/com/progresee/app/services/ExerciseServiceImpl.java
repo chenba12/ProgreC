@@ -205,7 +205,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 				Map<String, Date> uidAndDate = new Hashtable<String, Date>();
 				uidAndDate.put(uid, Calendar.getInstance().getTime());
 				usersFinishedList.put("usersFinishedList", uidAndDate);
-				ApiFuture<WriteResult> writeNewlyAdded = firestore.collection("tasks").document(exerciseId)
+				ApiFuture<WriteResult> writeNewlyAdded = firestore.collection("exercises").document(exerciseId)
 						.set(usersFinishedList, SetOptions.merge());
 
 				WriteResult writeResult = writeNewlyAdded.get();
@@ -221,7 +221,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 					if (existingMap.containsKey(uid)) {
 						existingMap.remove(uid);
 						usersFinishedList.put("usersFinishedList", existingMap);
-						ApiFuture<WriteResult> writeExisting = firestore.collection("tasks").document(exerciseId)
+						ApiFuture<WriteResult> writeExisting = firestore.collection("exercises").document(exerciseId)
 								.set(usersFinishedList, SetOptions.merge());
 
 						WriteResult writeResult = writeExisting.get();

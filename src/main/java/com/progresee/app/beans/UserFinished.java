@@ -11,8 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserFinished {
 
-	
 	private boolean hasFinished;
-	
+
 	private String timestamp;
 }
