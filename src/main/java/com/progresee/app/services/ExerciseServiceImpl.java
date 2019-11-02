@@ -189,6 +189,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 					Map<String, Object> existingMap=(Map<String, Object>) documentSnapshot.get("usersFinishedList");
 					if (existingMap.containsKey(uid)) {
 						existingMap.remove(uid);
+						usersFinishedList.put("usersFinishedList", existingMap);
 						ApiFuture<WriteResult> writeExisting = firestore.collection("tasks").document(exerciseId)
 								.set(usersFinishedList, SetOptions.merge());
 
