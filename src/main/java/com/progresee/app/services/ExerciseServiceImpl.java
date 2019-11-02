@@ -24,6 +24,7 @@ import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteResult;
 import com.progresee.app.beans.Exercise;
+import com.progresee.app.beans.Task;
 import com.progresee.app.services.dao.ExerciseService;
 import com.progresee.app.utils.ResponseUtils;
 
@@ -177,20 +178,20 @@ public class ExerciseServiceImpl implements ExerciseService {
 		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.ERROR, "/updateExercise");
 	}
 
-	private Map<String, Object> getExerciseAfterRequest(String exerciseUid) {
-		DocumentReference docRef = firestore.collection("exercises").document(exerciseUid);
+
+	private Map<String, Object> getExerciseAfterRequest(String exerciseId) {
+		DocumentReference docRef = firestore.collection("exercises").document(exerciseId);
 		try {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
 			DocumentSnapshot documentSnapshot = documentReference.get();
-			if (documentSnapshot.exists()) {
-				return documentSnapshot.getData();
-			}
-		} catch (InterruptedException | ExecutionException e) {
+			Exercise exercise = documentSnapshot.toObject(Exercise.class);
+			Map<String, Object> map = new Hashtable<>();
+			map.put(exerciseId, exercise);
+			return map;
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		response.setStatus(ResponseUtils.BAD_REQUEST);
-		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.ERROR, "");
+		return null;
 	}
 
 }
