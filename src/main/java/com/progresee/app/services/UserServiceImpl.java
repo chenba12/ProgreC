@@ -168,7 +168,7 @@ public class UserServiceImpl implements UserService {
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		map.clear();
-		map.put("name", classroomId);
+		map.put("name", classroomName);
 		map.put("description", description);
 		if (checkOwnerShip(classroomId, uid)) {
 			ApiFuture<WriteResult> docRef = firestore.collection("classrooms").document(classroomId).update(map);
