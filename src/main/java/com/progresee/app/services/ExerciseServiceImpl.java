@@ -2,6 +2,7 @@ package com.progresee.app.services;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.firestore.SetOptions;
 import com.google.cloud.firestore.WriteResult;
 import com.progresee.app.beans.Exercise;
 import com.progresee.app.beans.Task;
@@ -108,8 +110,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 			Exercise exercise = new Exercise();
 			exercise.setDateCreated(Calendar.getInstance().getTime());
 			exercise.setTaskUid(taskId);
-			exercise.setUsersFinishedList(new ArrayList<String>());
-			exercise.getUsersFinishedList().add(uid);
+			exercise.setUsersFinishedList(new Hashtable<String, Date>());
 			String exerciseUid = UUID.randomUUID().toString().replace("-", "");
 			exercise.setUid(exerciseUid);
 			exercise.setExerciseTitle(description);
@@ -131,15 +132,15 @@ public class ExerciseServiceImpl implements ExerciseService {
 	public Map<String, Object> deleteExercise(String token, String classroomId, String taskId, String exerciseId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
-			ApiFuture<WriteResult> docRef = firestore.collection("exercises").document(exerciseId).delete();
-			try {
-				WriteResult writeResult = docRef.get();
-				if (writeResult != null) {
-					return ResponseUtils.generateSuccessString("Exercise has been deleted");
-				}
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
+		ApiFuture<WriteResult> docRef = firestore.collection("exercises").document(exerciseId).delete();
+		try {
+			WriteResult writeResult = docRef.get();
+			if (writeResult != null) {
+				return ResponseUtils.generateSuccessString("Exercise has been deleted");
 			}
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
 		response.setStatus(ResponseUtils.FORBIDDEN);
 		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.ERROR, "/deleteExercise");
 	}
@@ -148,37 +149,64 @@ public class ExerciseServiceImpl implements ExerciseService {
 	public Map<String, Object> updateExercise(String token, String classroomId, String taskId, Exercise exercise) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
-			ApiFuture<WriteResult> docRef = firestore.collection("exercises").document(exercise.getUid()).set(exercise);
-			try {
-				WriteResult writeResult = docRef.get();
-				if (writeResult != null) {
-					return getExerciseAfterRequest(exercise.getUid());
-				}
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
+		ApiFuture<WriteResult> docRef = firestore.collection("exercises").document(exercise.getUid()).set(exercise);
+		try {
+			WriteResult writeResult = docRef.get();
+			if (writeResult != null) {
+				return getExerciseAfterRequest(exercise.getUid());
 			}
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
 		response.setStatus(ResponseUtils.FORBIDDEN);
 		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.ERROR, "/updateExercise");
 	}
 
 	@Override
-	public Map<String, Object> updateStatus(String token, String classroomId, String taskId, String exerciseId) {
+	public Map<String, Object> updateStatus(String token, String classroomId, String taskId, String exerciseId,
+			boolean hasFinished) {
 		Map<String, Object> map = userService.findCurrentUser(token);
+		Map<String, Object> usersFinishedList = new Hashtable<String, Object>();
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
-			ApiFuture<WriteResult> docRef = firestore.collection("tasks").document(exerciseId).update("usersFinishedList",FieldValue.arrayUnion(uid));
-			try {
-				WriteResult writeResult = docRef.get();
+		try {
+			if (hasFinished) {
+				Map<String, Date> uidAndDate = new Hashtable<String, Date>();
+				uidAndDate.put(uid, Calendar.getInstance().getTime());
+				usersFinishedList.put("usersFinishedList", uidAndDate);
+				ApiFuture<WriteResult> writeNewlyAdded = firestore.collection("tasks").document(exerciseId)
+						.set(usersFinishedList, SetOptions.merge());
+
+				WriteResult writeResult = writeNewlyAdded.get();
 				if (writeResult != null) {
 					return getExerciseAfterRequest(exerciseId);
 				}
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
+			} else {
+				DocumentReference docRef = firestore.collection("exercises").document(exerciseId);
+				ApiFuture<DocumentSnapshot> documentReference = docRef.get();
+				DocumentSnapshot documentSnapshot = documentReference.get();
+				if (documentSnapshot.exists()) {
+					Map<String, Object> existingMap=(Map<String, Object>) documentSnapshot.get("usersFinishedList");
+					if (existingMap.containsKey(uid)) {
+						existingMap.remove(uid);
+						ApiFuture<WriteResult> writeExisting = firestore.collection("tasks").document(exerciseId)
+								.set(usersFinishedList, SetOptions.merge());
+
+						WriteResult writeResult = writeExisting.get();
+						if (writeResult != null) {
+							return getExerciseAfterRequest(exerciseId);
+						}
+					}
+				}
+
 			}
+
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
 		response.setStatus(ResponseUtils.FORBIDDEN);
 		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.ERROR, "/updateExercise");
 	}
-
 
 	private Map<String, Object> getExerciseAfterRequest(String exerciseId) {
 		DocumentReference docRef = firestore.collection("exercises").document(exerciseId);
