@@ -85,23 +85,26 @@ public class ExerciseServiceImpl implements ExerciseService {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
 			DocumentSnapshot documentSnapshot = documentReference.get();
 			if (documentSnapshot.exists()) {
-				usersFinishedList=(Map<String, Object>) documentSnapshot.get("usersFinishedList");
-				System.out.println("usersFinishedList------------->"+usersFinishedList);
-				UserFinished userFinished=new UserFinished();
+				usersFinishedList = (Map<String, Object>) documentSnapshot.get("usersFinishedList");
+				System.out.println("usersFinishedList------------->" + usersFinishedList);
+				UserFinished userFinished = new UserFinished();
+				String userFinishedUid = UUID.randomUUID().toString().replace("-", "");
+				userFinished.setUid(userFinishedUid);
+				userFinished.setExerciseUid(exerciseId);
 				for (String it : usersInClassroom.keySet()) {
 					if (usersFinishedList.containsKey(it)) {
 						userFinished.setTimestamp(Calendar.getInstance().getTime().toString());
 						userFinished.setHasFinished(true);
-						finishedUsers.put(usersInClassroom.get(it),userFinished );
-						
+						finishedUsers.put(usersInClassroom.get(it), userFinished);
+
 					} else {
 						userFinished.setTimestamp("N/A");
 						userFinished.setHasFinished(false);
-						finishedUsers.put(usersInClassroom.get(it),userFinished );
-						
+						finishedUsers.put(usersInClassroom.get(it), userFinished);
+
 					}
 				}
-				System.out.println("finishedUsers------------->"+finishedUsers);
+				System.out.println("finishedUsers------------->" + finishedUsers);
 				return finishedUsers;
 			}
 		} catch (Exception e) {
