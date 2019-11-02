@@ -85,51 +85,55 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Map<String, Object> getClassroom(String token, String classroomId) {
-		Map<String, Object> map = findCurrentUser(token);
-		System.out.println("map -> " + map);
-		String uid = (String) map.get("uid");
-		try {
-			DocumentReference docRef = firestore.collection("classrooms").document(classroomId);
-			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
-			DocumentSnapshot documentSnapshot = documentReference.get();
-			List<String> users = (List<String>) documentSnapshot.get("userList");
-			if (users.contains(uid)) {
-				return documentSnapshot.getData();
-			}
-			response.setStatus(ResponseUtils.BAD_REQUEST);
-			return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM,
-					"/getClassroom");
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+    public Map<String, Object> getClassroom(String token, String classroomId) {
+        Map<String, Object> map = findCurrentUser(token);
+        System.out.println("map -> " + map);
+        String uid = (String) map.get("uid");
+        try {
+            DocumentReference docRef = firestore.collection("classrooms").document(classroomId);
+            ApiFuture<DocumentSnapshot> documentReference = docRef.get();
+            DocumentSnapshot documentSnapshot = documentReference.get();
+            Map<String, String> users = (Map<String, String>) documentSnapshot.get("userList");
+            if (users.containsKey(uid)) {
+                return documentSnapshot.getData();
+            }
+            response.setStatus(ResponseUtils.BAD_REQUEST);
+            return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM,
+                    "/getClassroom");
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 	@Override
 	public Map<String, Object> getClassrooms(String token) {
 		Map<String, Object> map = findCurrentUser(token);
-		System.out.println("map -> " + map);
-		String uid = (String) map.get("uid");
-		Query docRef = firestore.collection("classrooms").whereArrayContains("userList", uid);
-		try {
-			ApiFuture<QuerySnapshot> documentReference = docRef.get();
-			QuerySnapshot documentSnapshot = documentReference.get();
-			List<Classroom> tempClassrooms = documentSnapshot.toObjects(Classroom.class);
-			Map<String, Object> classrooms = new Hashtable<>();
-			for (Classroom classroom : tempClassrooms) {
-				classrooms.put(classroom.getUid(), classroom);
-			}
-			if (!classrooms.isEmpty()) {
-				return classrooms;
-			}
-
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-		response.setStatus(ResponseUtils.BAD_REQUEST);
-		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM,
-				"/getClassrooms");
+        System.out.println("map -> " + map);
+        String uid = (String) map.get("uid");
+        Query docRef = firestore.collection("classrooms");
+        try {
+            ApiFuture<QuerySnapshot> documentReference = docRef.get();
+            QuerySnapshot documentSnapshot = documentReference.get();
+            List<Classroom> tempClassrooms = documentSnapshot.toObjects(Classroom.class);
+            
+            Map<String, Object> classrooms = new Hashtable<>();
+            for (Classroom classroom : tempClassrooms) {
+                if (classroom.getUserList().containsKey(uid)) {
+                    classrooms.put(classroom.getUid(), classroom);
+                }
+                
+            }
+            if (!classrooms.isEmpty()) {
+                return classrooms;
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        response.setStatus(ResponseUtils.BAD_REQUEST);
+        return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM,
+                "/getClassrooms");
+        
 	}
 
 	@Override
@@ -503,19 +507,19 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public boolean checkIfUserIsPartOfClassroom(String classroomId, String uid) {
-		try {
-			DocumentReference docRef = firestore.collection("classrooms").document(classroomId);
-			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
-			DocumentSnapshot documentSnapshot = documentReference.get();
-			List<String> users = (List<String>) documentSnapshot.get("userList");
-			if (users.size() > 0 && users.contains(uid)) {
-				return true;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
+        try {
+            DocumentReference docRef = firestore.collection("classrooms").document(classroomId);
+            ApiFuture<DocumentSnapshot> documentReference = docRef.get();
+            DocumentSnapshot documentSnapshot = documentReference.get();
+            Map<String, String> users = (Map<String, String>) documentSnapshot.get("userList");
+            if (users.size() > 0 && users.containsKey(uid)) {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
 	public Map<String, String> getUsersInClassroomNoToken(String classroomId) {
 		DocumentReference docRef = firestore.collection("classrooms").document(classroomId);
