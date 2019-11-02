@@ -199,16 +199,17 @@ public class ExerciseServiceImpl implements ExerciseService {
 	}
 
 	@Override
-	public Map<String, Object> updateStatus(String token, String classroomId, String taskId, String exerciseId,
-			boolean hasFinished) {
+	public Map<String, Object> updateStatus(String token, String classroomId, String exerciseId,
+			String hasFinished) {
+		System.out.println(hasFinished);
 		Map<String, Object> map = userService.findCurrentUser(token);
 		Map<String, Object> usersFinishedList = new Hashtable<String, Object>();
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		try {
-			if (hasFinished) {
-				Map<String, Date> uidAndDate = new Hashtable<String, Date>();
-				uidAndDate.put(uid, Calendar.getInstance().getTime());
+			if (hasFinished.equals("1")) {
+				Map<String, Object> uidAndDate = new Hashtable<String, Object>();
+				uidAndDate.put(uid, Calendar.getInstance().getTime().toString());
 				usersFinishedList.put("usersFinishedList", uidAndDate);
 				ApiFuture<WriteResult> writeNewlyAdded = firestore.collection("exercises").document(exerciseId)
 						.set(usersFinishedList, SetOptions.merge());
@@ -217,7 +218,9 @@ public class ExerciseServiceImpl implements ExerciseService {
 				if (writeResult != null) {
 					return getExerciseAfterRequest(exerciseId);
 				}
-			} else {
+			} else if (hasFinished.equals("0")) {
+				
+			
 				DocumentReference docRef = firestore.collection("exercises").document(exerciseId);
 				ApiFuture<DocumentSnapshot> documentReference = docRef.get();
 				DocumentSnapshot documentSnapshot = documentReference.get();
@@ -235,7 +238,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 						}
 					}
 				}
-
+		
 			}
 
 		} catch (InterruptedException | ExecutionException e) {
