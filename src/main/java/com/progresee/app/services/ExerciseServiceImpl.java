@@ -94,13 +94,13 @@ public class ExerciseServiceImpl implements ExerciseService {
 				for (String it : usersInClassroom.keySet()) {
 					if (usersFinishedList.containsKey(it)) {
 						userFinished.setTimestamp(Calendar.getInstance().getTime().toString());
-						userFinished.setHasFinished(true);
+						userFinished.setHasFinished("1");
 						userFinished.setEmail(usersInClassroom.get(it));
 						finishedUsers.put(usersInClassroom.get(it), userFinished);
 
 					} else {
 						userFinished.setTimestamp("N/A");
-						userFinished.setHasFinished(false);
+						userFinished.setHasFinished("0");
 						userFinished.setEmail(usersInClassroom.get(it));
 						finishedUsers.put(usersInClassroom.get(it), userFinished);
 
