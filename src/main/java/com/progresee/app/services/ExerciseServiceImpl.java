@@ -109,6 +109,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 			exercise.setDateCreated(Calendar.getInstance().getTime());
 			exercise.setTaskUid(taskId);
 			exercise.setUsersFinishedList(new ArrayList<String>());
+			exercise.getUsersFinishedList().add(uid);
 			String exerciseUid = UUID.randomUUID().toString().replace("-", "");
 			exercise.setUid(exerciseUid);
 			exercise.setExerciseTitle(description);

@@ -25,41 +25,41 @@ public class TaskController {
 	@Autowired
 	private TaskServiceImpl taskService;
 
-	// http://localhost:5000/task/getAll?{classRoomId}
+	// http://localhost:5000/task/getAll?{classroomId}
 	@GetMapping("/getAllTasks")
 	public Map<String, Object> getAllTasks(@RequestHeader("Authorization") String token,
-			@RequestParam String classRoomId) {
-		return taskService.getAllTasks(token, classRoomId);
+			@RequestParam String classroomId) {
+		return taskService.getAllTasks(token, classroomId);
 	}
 
-	// http://localhost:5000/task/getTask?{classRoomId}/{taskId}
+	// http://localhost:5000/task/getTask?{classroomId}/{taskId}
 	@GetMapping("/getTask")
-	public Map<String, Object> getTask(@RequestHeader("Authorization") String token, @RequestParam String classRoomId,
+	public Map<String, Object> getTask(@RequestHeader("Authorization") String token, @RequestParam String classroomId,
 			@RequestParam String taskId) {
-		return taskService.getTask(token, classRoomId, taskId);
+		return taskService.getTask(token, classroomId, taskId);
 	}
 
-	// http://localhost:5000/task/createTask?{classRoomId}
+	// http://localhost:5000/task/createTask?{classroomId}
 	@PostMapping("/createTask")
 	public Map<String, Object> createTask(@RequestHeader("Authorization") String token,
-			@RequestParam String classRoomId, @RequestParam String title,@RequestParam String description,@RequestParam String link,@RequestParam String date) {
-			return taskService.createTask(token, classRoomId,title,description,link,date);
+			@RequestParam String classroomId, @RequestParam String title,@RequestParam String description,@RequestParam String link,@RequestParam String date) {
+			return taskService.createTask(token, classroomId,title,description,link,date);
 
 	}
 
-	// http://localhost:5000/task/delete?{classRoomId}
+	// http://localhost:5000/task/delete?{classroomId}
 	@DeleteMapping("/deleteTask")
 	public Map<String, Object> deleteTask(@RequestHeader("Authorization") String token,
-			@RequestParam String classRoomId, @RequestParam String taskId) {
-		return taskService.deleteTask(token, classRoomId, taskId);
+			@RequestParam String classroomId, @RequestParam String taskId) {
+		return taskService.deleteTask(token, classroomId, taskId);
 	}
 
-	// http://localhost:5000/task/update?{classRoomId}
+	// http://localhost:5000/task/update?{classroomId}
 	@PutMapping("/updateTask")
 	public Map<String, Object> updateTask(@RequestHeader("Authorization") String token,
-			@RequestParam String classRoomId, @RequestBody Task task) {
+			@RequestParam String classroomId, @RequestBody Task task) {
 		if (NullCheckerUtils.taskNullChecker(task)) {
-			return taskService.updateTask(token, classRoomId, task);
+			return taskService.updateTask(token, classroomId, task);
 		}
 		return null;
 	}

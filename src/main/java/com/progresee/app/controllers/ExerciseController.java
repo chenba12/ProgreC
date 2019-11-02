@@ -25,51 +25,51 @@ public class ExerciseController {
 
 
 
-	// http://localhost:5000/exercise/getExercise?{classRoomId}?{taskId}?{exerciseId}
+	// http://localhost:5000/exercise/getExercise?{classroomId}?{taskId}?{exerciseId}
 	@GetMapping("/getExercise")
-	public Map<String, Object> getExercise(@RequestHeader("Authorization") String token,@RequestParam String classRoomId, @RequestParam String taskId,
+	public Map<String, Object> getExercise(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId,
 			@RequestParam String exerciseId) {
-		return exerciseService.getExercise(token,classRoomId, taskId, exerciseId);
+		return exerciseService.getExercise(token,classroomId, taskId, exerciseId);
 	}
 
 	@GetMapping("/getFinishedUsers")
-	public Map<String, Object> getFinishedUsers(@RequestHeader("Authorization") String token,@RequestParam String classRoomId, @RequestParam String taskId,
+	public Map<String, Object> getFinishedUsers(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId,
 			@RequestParam String exerciseId) {
-		return exerciseService.getFinishedUsers(token,classRoomId, taskId, exerciseId);
+		return exerciseService.getFinishedUsers(token,classroomId, taskId, exerciseId);
 	}
 
-	// http://localhost:5000/exercise/getAll?{classRoomId}/{taskId}
+	// http://localhost:5000/exercise/getAll?{classroomId}/{taskId}
 	@GetMapping("/getAllExercises")
-	public Map<String, Object> getAllExercises(@RequestHeader("Authorization") String token,@RequestParam String classRoomId, @RequestParam String taskId) {
-		return exerciseService.getAllExercises(token,classRoomId, taskId);
+	public Map<String, Object> getAllExercises(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId) {
+		return exerciseService.getAllExercises(token,classroomId, taskId);
 	}
 
-	// http://localhost:5000/exercise/createExercise?{classRoomId}/{taskId}
+	// http://localhost:5000/exercise/createExercise?{classroomId}/{taskId}
 	@PostMapping("/createExercise")
-	public Map<String, Object> createExercise(@RequestHeader("Authorization") String token,@RequestParam String classRoomId, @RequestParam String taskId,
+	public Map<String, Object> createExercise(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId,
 			@RequestParam String description) {
-		return exerciseService.createExercise(token,classRoomId, taskId, description);
+		return exerciseService.createExercise(token,classroomId, taskId, description);
 	}
 
-	// http://localhost:5000/exercise/deleteExercise?{classRoomId}/{taskId}/{exerciseId}
+	// http://localhost:5000/exercise/deleteExercise?{classroomId}/{taskId}/{exerciseId}
 	@DeleteMapping("/deleteExercise")
-	public Map<String, Object> deleteExercise(@RequestHeader("Authorization") String token,@RequestParam String classRoomId, @RequestParam String taskId,
+	public Map<String, Object> deleteExercise(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId,
 			@RequestParam String exerciseId) {
-		return exerciseService.deleteExercise(token,classRoomId, taskId, exerciseId);
+		return exerciseService.deleteExercise(token,classroomId, taskId, exerciseId);
 	}
 
-	// http://localhost:5000/exercise/update?{classRoomId}/{taskId}
+	// http://localhost:5000/exercise/update?{classroomId}/{taskId}
 	@PutMapping("/updateExercise")
-	public Map<String, Object> updateExercise(@RequestHeader("Authorization") String token,@RequestParam String classRoomId, @RequestParam String taskId,
+	public Map<String, Object> updateExercise(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId,
 			@RequestBody Exercise exercise) {
-		return exerciseService.updateExercise(token,classRoomId, taskId, exercise);
+		return exerciseService.updateExercise(token,classroomId, taskId, exercise);
 	}
 
-	// http://localhost:5000/exercise/updateStatus?{classRoomId}/{taskId}
+	// http://localhost:5000/exercise/updateStatus?{classroomId}/{taskId}
 	@PutMapping("updateStatus")
-	public Map<String, Object> updateStatus(@RequestHeader("Authorization") String token,@RequestParam String classRoomId, @RequestParam String taskId,
+	public Map<String, Object> updateStatus(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId,
 			@RequestParam String exerciseId) {
-		return exerciseService.updateStatus(token,classRoomId, taskId, exerciseId);
+		return exerciseService.updateStatus(token,classroomId, taskId, exerciseId);
 	}
 
 }
