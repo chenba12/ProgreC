@@ -16,7 +16,7 @@ public class Exercise {
 	private String uid;
 	private String exerciseTitle;
 	private Date dateCreated;
-	private Map<String, Date> usersFinishedList;
+	private Map<String, Object> usersFinishedList;
 	private String taskUid;
 
 }

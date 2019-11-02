@@ -33,9 +33,9 @@ public class ExerciseController {
 	}
 
 	@GetMapping("/getFinishedUsers")
-	public Map<String, Object> getFinishedUsers(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId,
+	public Map<String, Object> getFinishedUsers(@RequestHeader("Authorization") String token,@RequestParam String classroomId,
 			@RequestParam String exerciseId) {
-		return exerciseService.getFinishedUsers(token,classroomId, taskId, exerciseId);
+		return exerciseService.getFinishedUsers(token,classroomId, exerciseId);
 	}
 
 	// http://localhost:5000/exercise/getAll?{classroomId}/{taskId}

@@ -27,6 +27,7 @@ import com.google.cloud.firestore.SetOptions;
 import com.google.cloud.firestore.WriteResult;
 import com.progresee.app.beans.Exercise;
 import com.progresee.app.beans.Task;
+import com.progresee.app.beans.UserFinished;
 import com.progresee.app.services.dao.ExerciseService;
 import com.progresee.app.utils.ResponseUtils;
 
@@ -73,8 +74,38 @@ public class ExerciseServiceImpl implements ExerciseService {
 	}
 
 	@Override
-	public Map<String, Object> getFinishedUsers(String token, String classroomId, String taskId, String exerciseId) {
-		// TODO Auto-generated method stub
+	public Map<String, Object> getFinishedUsers(String token, String classroomId, String exerciseId) {
+		Map<String, String> usersInClassroom = new Hashtable<String, String>();
+		Map<String, Object> usersFinishedList = new Hashtable<String, Object>();
+		Map<String, Object> finishedUsers = new Hashtable<String, Object>();
+		usersInClassroom = userService.getUsersInClassroomNoToken(classroomId);
+		System.out.println("usersinclassroom------>" + usersInClassroom);
+		DocumentReference docRef = firestore.collection("exercises").document(exerciseId);
+		try {
+			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
+			DocumentSnapshot documentSnapshot = documentReference.get();
+			if (documentSnapshot.exists()) {
+				usersFinishedList=(Map<String, Object>) documentSnapshot.get("usersFinishedList");
+				System.out.println("usersFinishedList------------->"+usersFinishedList);
+				UserFinished userFinished=new UserFinished();
+				for (String it : usersInClassroom.keySet()) {
+					if (usersFinishedList.containsKey(it)) {
+						userFinished.setTimestamp(Calendar.getInstance().getTime().toString());
+						userFinished.setHasFinished(true);
+						finishedUsers.put(usersInClassroom.get(it),userFinished );
+						
+					} else {
+						userFinished.setTimestamp("N/A");
+						userFinished.setHasFinished(false);
+						finishedUsers.put(usersInClassroom.get(it),userFinished );
+						
+					}
+				}
+				System.out.println("finishedUsers------------->"+finishedUsers);
+				return finishedUsers;
+			}
+		} catch (Exception e) {
+		}
 		return null;
 	}
 
@@ -110,7 +141,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 			Exercise exercise = new Exercise();
 			exercise.setDateCreated(Calendar.getInstance().getTime());
 			exercise.setTaskUid(taskId);
-			exercise.setUsersFinishedList(new Hashtable<String, Date>());
+			exercise.setUsersFinishedList(new Hashtable<String, Object>());
 			String exerciseUid = UUID.randomUUID().toString().replace("-", "");
 			exercise.setUid(exerciseUid);
 			exercise.setExerciseTitle(description);
@@ -186,7 +217,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 				ApiFuture<DocumentSnapshot> documentReference = docRef.get();
 				DocumentSnapshot documentSnapshot = documentReference.get();
 				if (documentSnapshot.exists()) {
-					Map<String, Object> existingMap=(Map<String, Object>) documentSnapshot.get("usersFinishedList");
+					Map<String, Object> existingMap = (Map<String, Object>) documentSnapshot.get("usersFinishedList");
 					if (existingMap.containsKey(uid)) {
 						existingMap.remove(uid);
 						usersFinishedList.put("usersFinishedList", existingMap);

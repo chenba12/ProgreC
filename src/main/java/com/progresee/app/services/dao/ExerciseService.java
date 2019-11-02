@@ -8,8 +8,6 @@ public interface ExerciseService {
 
 	public Map<String, Object> getExercise(String token, String classroomId, String taskId, String exerciseId);
 
-	public Map<String, Object> getFinishedUsers(String token, String classroomId, String taskId, String exerciseId);
-
 	public Map<String, Object> getAllExercises(String token, String classroomId, String taskId);
 
 	public Map<String, Object> createExercise(String token, String classroomId, String taskId, String description);
@@ -21,6 +19,8 @@ public interface ExerciseService {
 
 	public Map<String, Object> updateStatus(String token, String classroomId, String taskId, String exerciseId,
 			boolean hasFinished);
+
+	public Map<String, Object> getFinishedUsers(String token, String classroomId, String exerciseId);
 
 
 }
