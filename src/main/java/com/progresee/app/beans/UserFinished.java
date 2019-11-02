@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserFinished {
 	
+	private String email;
+	
 	private String uid;
 
 	private boolean hasFinished;
