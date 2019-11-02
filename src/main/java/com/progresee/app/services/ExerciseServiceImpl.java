@@ -200,13 +200,13 @@ public class ExerciseServiceImpl implements ExerciseService {
 
 	@Override
 	public Map<String, Object> updateStatus(String token, String classroomId, String taskId, String exerciseId,
-			boolean hasFinished) {
+			String hasFinished) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		Map<String, Object> usersFinishedList = new Hashtable<String, Object>();
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		try {
-			if (hasFinished) {
+			if (hasFinished=="1") {
 				Map<String, Date> uidAndDate = new Hashtable<String, Date>();
 				uidAndDate.put(uid, Calendar.getInstance().getTime());
 				usersFinishedList.put("usersFinishedList", uidAndDate);
