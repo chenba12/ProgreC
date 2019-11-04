@@ -1,32 +1,26 @@
 package com.progresee.app.services;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.SetOptions;
 import com.google.cloud.firestore.WriteResult;
 import com.progresee.app.beans.Exercise;
-import com.progresee.app.beans.Task;
 import com.progresee.app.beans.UserFinished;
 import com.progresee.app.services.dao.ExerciseService;
 import com.progresee.app.utils.ResponseUtils;
@@ -75,9 +69,9 @@ public class ExerciseServiceImpl implements ExerciseService {
 
 	@Override
 	public Map<String, Object> getFinishedUsers(String token, String classroomId, String exerciseId) {
-		Map<String, String> usersInClassroom = new Hashtable<String, String>();
-		Map<String, Object> usersFinishedList = new Hashtable<String, Object>();
-		Map<String, Object> finishedUsers = new Hashtable<String, Object>();
+		Map<String, String> usersInClassroom = new HashMap<>();
+		Map<String, Object> usersFinishedList = new HashMap<>();
+		Map<String, Object> finishedUsers = new HashMap<>();
 		usersInClassroom = userService.getUsersInClassroomNoToken(classroomId);
 		System.out.println("usersinclassroom------>" + usersInClassroom);
 		DocumentReference docRef = firestore.collection("exercises").document(exerciseId);
@@ -123,7 +117,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 			ApiFuture<QuerySnapshot> documentReference = docRef.get();
 			QuerySnapshot documentSnapshot = documentReference.get();
 			List<Exercise> tempExercises = documentSnapshot.toObjects(Exercise.class);
-			Map<String, Object> exercises = new Hashtable<>();
+			Map<String, Object> exercises = new HashMap<String, Object>();
 			for (Exercise exercise : tempExercises) {
 				exercises.put(exercise.getUid(), exercise);
 			}
@@ -199,16 +193,15 @@ public class ExerciseServiceImpl implements ExerciseService {
 	}
 
 	@Override
-	public Map<String, Object> updateStatus(String token, String classroomId, String exerciseId,
-			String hasFinished) {
+	public Map<String, Object> updateStatus(String token, String classroomId, String exerciseId, String hasFinished) {
 		System.out.println(hasFinished);
 		Map<String, Object> map = userService.findCurrentUser(token);
-		Map<String, Object> usersFinishedList = new Hashtable<String, Object>();
+		Map<String, Object> usersFinishedList = new HashMap<String, Object>();
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		try {
 			if (hasFinished.equals("1")) {
-				Map<String, Object> uidAndDate = new Hashtable<String, Object>();
+				Map<String, Object> uidAndDate = new HashMap<String, Object>();
 				uidAndDate.put(uid, Calendar.getInstance().getTime().toString());
 				usersFinishedList.put("usersFinishedList", uidAndDate);
 				ApiFuture<WriteResult> writeNewlyAdded = firestore.collection("exercises").document(exerciseId)
@@ -219,8 +212,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 					return getExerciseAfterRequest(exerciseId);
 				}
 			} else if (hasFinished.equals("0")) {
-				
-			
+
 				DocumentReference docRef = firestore.collection("exercises").document(exerciseId);
 				ApiFuture<DocumentSnapshot> documentReference = docRef.get();
 				DocumentSnapshot documentSnapshot = documentReference.get();
@@ -238,7 +230,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 						}
 					}
 				}
-		
+
 			}
 
 		} catch (InterruptedException | ExecutionException e) {
@@ -254,7 +246,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
 			DocumentSnapshot documentSnapshot = documentReference.get();
 			Exercise exercise = documentSnapshot.toObject(Exercise.class);
-			Map<String, Object> map = new Hashtable<>();
+			Map<String, Object> map = new HashMap<String, Object>();
 			map.put(exerciseId, exercise);
 			return map;
 		} catch (Exception e) {
