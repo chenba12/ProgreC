@@ -110,31 +110,21 @@ public class ExerciseServiceImpl implements ExerciseService {
 		Map<String, Object> finishedUsersTemp = new HashMap<>();
 		Map<String, Object> finishedUsersToSave = new HashMap<>();
 		usersInClassroom = userService.getUsersInClassroomNoToken(classroomId);
-		System.out.println("usersinclassroom------>" + usersInClassroom);
-		DocumentReference docRef = firestore.collection(EXERCISES).document(exerciseId);
 		try {
-			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
-			DocumentSnapshot documentSnapshot = documentReference.get();
-			if (documentSnapshot.exists()) {
-				finishedUsersList = (Map<String, Object>) documentSnapshot.get("finishedUsersList");
+				System.out.println("exist");
 				for (String email : usersInClassroom.values()) {
 					finishedUsersTemp.put(email, "N/A");
 				}
-				if (finishedUsersList.size() > 0) {
-					for (String email : finishedUsersList.keySet()) {
-						if (finishedUsersTemp.containsKey(email)) {
-							finishedUsersTemp.put(email, finishedUsersList.get(email));
-						}
-					}
-				}
+				System.out.println("finishedUsersTemp--->" +finishedUsersTemp);
 				finishedUsersToSave.put("finishedUsersList", finishedUsersTemp);
 				ApiFuture<WriteResult> write = firestore.collection(EXERCISES).document(exerciseId)
-						.set(finishedUsersList, SetOptions.merge());
+						.set(finishedUsersList);
 				WriteResult writeResult = write.get();
 				if (writeResult != null) {
+					System.out.println("yay");
 					return finishedUsersTemp;
 				}
-			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
