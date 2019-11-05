@@ -30,7 +30,7 @@ public class UserController {
 
 	@GetMapping("/getCurrentUser")
 	public Map<String, Object> getCurrentUser(@RequestHeader("Authorization") String token) {
-		return service.getUser(token);
+		return service.findCurrentUser(token);
 	}
 
 	// http://localhost:5000/user/updateUser

@@ -54,6 +54,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Map<String, Object> getUser(String token) {
 		try {
+		//	Map<String, Object> currentUser = findCurrentUser(token);
 			FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
 			String uid = decodedToken.getUid();
 			DocumentReference documentReference = firestore.collection(USERS).document(uid);
@@ -64,6 +65,48 @@ public class UserServiceImpl implements UserService {
 			}
 
 		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	@Override
+	public Map<String, Object> findCurrentUser(String token) {
+		try {
+			FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
+			String uid = decodedToken.getUid();
+			Map<String, Object> map = new HashMap<>();
+			DocumentReference documentReference = firestore.collection(USERS).document(uid);
+			ApiFuture<DocumentSnapshot> apiFuture = documentReference.get();
+			DocumentSnapshot documentSnapshot = apiFuture.get();
+			map.put("signedIn", Calendar.getInstance().getTime());
+			if (documentSnapshot.exists()) {
+				ApiFuture<WriteResult> updatedDocumentReference = firestore.collection(USERS).document(uid)
+						.update(map);
+				if (updatedDocumentReference != null) {
+					map.clear();
+					map.put("uid", uid);
+					map.put("email", documentSnapshot.getData().get("email"));
+					return map;
+				}
+			} else {
+				User user = new User();
+				user.setDateCreated(Calendar.getInstance().getTime());
+				user.setSignedIn(Calendar.getInstance().getTime());
+				user.setFullName(decodedToken.getName());
+				user.setEmail(decodedToken.getEmail());
+				user.setProfilePictureUrl(decodedToken.getPicture());
+				user.setUid(uid);
+				ApiFuture<WriteResult> docRef = firestore.collection(USERS).document(uid).set(user);
+				if (docRef != null) {
+					System.out.println("user added " + user);
+					map.clear();
+					map.put("uid", uid);
+					map.put("email", decodedToken.getEmail());
+					return map;
+				}
+			}
+		} catch (FirebaseAuthException | InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -404,47 +447,7 @@ public class UserServiceImpl implements UserService {
 				"/removeFromClassroom");
 	}
 
-	@Override
-	public Map<String, Object> findCurrentUser(String token) {
-		try {
-			FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
-			String uid = decodedToken.getUid();
-			Map<String, Object> map = new HashMap<>();
-			DocumentReference documentReference = firestore.collection(USERS).document(uid);
-			ApiFuture<DocumentSnapshot> apiFuture = documentReference.get();
-			DocumentSnapshot documentSnapshot = apiFuture.get();
-			map.put("signedIn", Calendar.getInstance().getTime());
-			if (documentSnapshot.exists()) {
-				ApiFuture<WriteResult> updatedDocumentReference = firestore.collection(USERS).document(uid)
-						.update(map);
-				if (updatedDocumentReference != null) {
-					map.clear();
-					map.put("uid", uid);
-					map.put("email", documentSnapshot.getData().get("email"));
-					return map;
-				}
-			} else {
-				User user = new User();
-				user.setDateCreated(Calendar.getInstance().getTime());
-				user.setSignedIn(Calendar.getInstance().getTime());
-				user.setFullName(decodedToken.getName());
-				user.setEmail(decodedToken.getEmail());
-				user.setProfilePictureUrl(decodedToken.getPicture());
-				user.setUid(uid);
-				ApiFuture<WriteResult> docRef = firestore.collection(USERS).document(uid).set(user);
-				if (docRef != null) {
-					System.out.println("user added " + user);
-					map.clear();
-					map.put("uid", uid);
-					map.put("email", decodedToken.getEmail());
-					return map;
-				}
-			}
-		} catch (FirebaseAuthException | InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+
 
 	private Map<String, Object> getClassroomAfterRequest(String uid) {
 		DocumentReference docRef = firestore.collection(CLASSROOMS).document(uid);
