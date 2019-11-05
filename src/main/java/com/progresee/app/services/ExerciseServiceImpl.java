@@ -93,7 +93,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 				}
 				finishedUsersToSave.put("finishedUsersList", finishedUsersTemp);
 				ApiFuture<WriteResult> write = firestore.collection(EXERCISES).document(exerciseId)
-						.set(finishedUsersList, SetOptions.merge());
+						.set(finishedUsersToSave, SetOptions.merge());
 				WriteResult writeResult = write.get();
 				if (writeResult != null) {
 					return finishedUsersTemp;
@@ -104,27 +104,29 @@ public class ExerciseServiceImpl implements ExerciseService {
 		}
 		return null;
 	}
-	public Map<String, Object> initfinishedUsersList(String classroomId, String exerciseId) {
+
+	public Map<String, Object> initFinishedUsersList(String classroomId, String exerciseId) {
+		System.out.println("checkedOwnership 9");
 		Map<String, String> usersInClassroom = new HashMap<>();
 		Map<String, Object> finishedUsersList = new HashMap<>();
 		Map<String, Object> finishedUsersTemp = new HashMap<>();
 		Map<String, Object> finishedUsersToSave = new HashMap<>();
 		usersInClassroom = userService.getUsersInClassroomNoToken(classroomId);
 		try {
-				System.out.println("exist");
-				for (String email : usersInClassroom.values()) {
-					finishedUsersTemp.put(email, "N/A");
-				}
-				System.out.println("finishedUsersTemp--->" +finishedUsersTemp);
-				finishedUsersToSave.put("finishedUsersList", finishedUsersTemp);
-				ApiFuture<WriteResult> write = firestore.collection(EXERCISES).document(exerciseId)
-						.set(finishedUsersList);
-				WriteResult writeResult = write.get();
-				if (writeResult != null) {
-					System.out.println("yay");
-					return finishedUsersTemp;
-				}
-			
+			System.out.println("checkedOwnership 10");
+			System.out.println("exist");
+			for (String email : usersInClassroom.values()) {
+				finishedUsersTemp.put(email, "N/A");
+			}
+			System.out.println("finishedUsersTemp--->" + finishedUsersTemp);
+			finishedUsersToSave.put("finishedUsersList", finishedUsersTemp);
+			ApiFuture<WriteResult> write = firestore.collection(EXERCISES).document(exerciseId).set(finishedUsersToSave,SetOptions.merge());
+			WriteResult writeResult = write.get();
+			if (writeResult != null) {
+				System.out.println("yay");
+				return finishedUsersTemp;
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -157,10 +159,11 @@ public class ExerciseServiceImpl implements ExerciseService {
 	@Override
 	public Map<String, Object> createExercise(String token, String classroomId, String taskId, String description) {
 		Map<String, Object> map = userService.findCurrentUser(token);
-		Map<String, Object> checkMap=new HashMap<>();
+		Map<String, Object> checkMap = new HashMap<>();
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkOwnerShip(classroomId, uid)) {
+			System.out.println("checkedOwnership 1");
 			Exercise exercise = new Exercise();
 			exercise.setDateCreated(Calendar.getInstance().getTime());
 			exercise.setTaskUid(taskId);
@@ -168,12 +171,19 @@ public class ExerciseServiceImpl implements ExerciseService {
 			String exerciseUid = UUID.randomUUID().toString().replace("-", "");
 			exercise.setUid(exerciseUid);
 			exercise.setExerciseTitle(description);
+			System.out.println("checkedOwnership 2");
 			ApiFuture<WriteResult> docRef = firestore.collection(EXERCISES).document(exerciseUid).set(exercise);
+			System.out.println("checkedOwnership 3");
 			try {
+				System.out.println("checkedOwnership 4");
 				WriteResult writeResult = docRef.get();
+				System.out.println("checkedOwnership 5");
 				if (writeResult != null) {
-					checkMap=initfinishedUsersList(classroomId,exerciseUid);
-					if (checkMap!=null) {
+					System.out.println("checkedOwnership 6");
+					checkMap = initFinishedUsersList(classroomId, exerciseUid);
+					System.out.println("checkedOwnership 7");
+					if (checkMap != null) {
+						System.out.println("checkedOwnership 8");
 						return getExerciseAfterRequest(exerciseUid);
 					}
 				}
@@ -231,10 +241,8 @@ public class ExerciseServiceImpl implements ExerciseService {
 			DocumentSnapshot documentSnapshot = documentReference.get();
 			if (documentSnapshot.exists()) {
 				finishedUsersTemp = (Map<String, Object>) documentSnapshot.get("finishedUsersList");
-				if (finishedUsersTemp != null) {
-					if (finishedUsersTemp.containsKey(email)) {
+					if (finishedUsersTemp.get(email).equals("N/A")) {
 						finishedUsersTemp.put(email, Calendar.getInstance().getTime().toString());
-
 					} else {
 						finishedUsersTemp.put(email, "N/A");
 					}
@@ -247,7 +255,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 						return ResponseUtils.generateSuccessString("Update successfully");
 					}
 				}
-			}
+			
 
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
