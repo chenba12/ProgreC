@@ -2,11 +2,13 @@ package com.progresee.app.services.dao;
 
 import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
+
 import com.progresee.app.beans.User;
 
 public interface UserService {
 
-	public Map<String, Object> getUser(String token);
+	public ResponseEntity<Object> getUser(String token);
 
 	public Map<String, Object> updateUser(String token, User user);
 

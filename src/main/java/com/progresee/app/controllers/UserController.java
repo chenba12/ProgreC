@@ -3,6 +3,7 @@ package com.progresee.app.controllers;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,8 +30,8 @@ public class UserController {
 	HttpServletResponse res;
 
 	@GetMapping("/getCurrentUser")
-	public Map<String, Object> getCurrentUser(@RequestHeader("Authorization") String token) {
-		return service.findCurrentUser(token);
+	public ResponseEntity<Object> getCurrentUser(@RequestHeader("Authorization") String token) {
+		return service.getUser(token);
 	}
 
 	// http://localhost:5000/user/updateUser
