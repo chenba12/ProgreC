@@ -68,8 +68,8 @@ public class ExerciseController {
 	// http://localhost:5000/exercise/updateStatus?{classroomId}/{taskId}
 	@PutMapping("updateStatus")
 	public Map<String, Object> updateStatus(@RequestHeader("Authorization") String token,@RequestParam String classroomId,
-			@RequestParam String exerciseId, @RequestParam String hasFinished) {
-		return exerciseService.updateStatus(token,classroomId, exerciseId,hasFinished);
+			@RequestParam String exerciseId) {
+		return exerciseService.updateStatus(token,classroomId, exerciseId);
 	}
 
 }

@@ -72,6 +72,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 		Map<String, String> usersInClassroom = new HashMap<>();
 		Map<String, Object> finishedUsersList = new HashMap<>();
 		Map<String, Object> finishedUsersTemp = new HashMap<>();
+		Map<String, Object> finishedUsersToSave = new HashMap<>();
 		usersInClassroom = userService.getUsersInClassroomNoToken(classroomId);
 		System.out.println("usersinclassroom------>" + usersInClassroom);
 		DocumentReference docRef = firestore.collection(EXERCISES).document(exerciseId);
@@ -90,8 +91,49 @@ public class ExerciseServiceImpl implements ExerciseService {
 						}
 					}
 				}
-
-				return finishedUsersTemp;
+				finishedUsersToSave.put("finishedUsersList", finishedUsersTemp);
+				ApiFuture<WriteResult> write = firestore.collection(EXERCISES).document(exerciseId)
+						.set(finishedUsersList, SetOptions.merge());
+				WriteResult writeResult = write.get();
+				if (writeResult != null) {
+					return finishedUsersTemp;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	public Map<String, Object> initfinishedUsersList(String classroomId, String exerciseId) {
+		Map<String, String> usersInClassroom = new HashMap<>();
+		Map<String, Object> finishedUsersList = new HashMap<>();
+		Map<String, Object> finishedUsersTemp = new HashMap<>();
+		Map<String, Object> finishedUsersToSave = new HashMap<>();
+		usersInClassroom = userService.getUsersInClassroomNoToken(classroomId);
+		System.out.println("usersinclassroom------>" + usersInClassroom);
+		DocumentReference docRef = firestore.collection(EXERCISES).document(exerciseId);
+		try {
+			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
+			DocumentSnapshot documentSnapshot = documentReference.get();
+			if (documentSnapshot.exists()) {
+				finishedUsersList = (Map<String, Object>) documentSnapshot.get("finishedUsersList");
+				for (String email : usersInClassroom.values()) {
+					finishedUsersTemp.put(email, "N/A");
+				}
+				if (finishedUsersList.size() > 0) {
+					for (String email : finishedUsersList.keySet()) {
+						if (finishedUsersTemp.containsKey(email)) {
+							finishedUsersTemp.put(email, finishedUsersList.get(email));
+						}
+					}
+				}
+				finishedUsersToSave.put("finishedUsersList", finishedUsersTemp);
+				ApiFuture<WriteResult> write = firestore.collection(EXERCISES).document(exerciseId)
+						.set(finishedUsersList, SetOptions.merge());
+				WriteResult writeResult = write.get();
+				if (writeResult != null) {
+					return finishedUsersTemp;
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -125,6 +167,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 	@Override
 	public Map<String, Object> createExercise(String token, String classroomId, String taskId, String description) {
 		Map<String, Object> map = userService.findCurrentUser(token);
+		Map<String, Object> checkMap=new HashMap<>();
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkOwnerShip(classroomId, uid)) {
@@ -139,8 +182,10 @@ public class ExerciseServiceImpl implements ExerciseService {
 			try {
 				WriteResult writeResult = docRef.get();
 				if (writeResult != null) {
-
-					return getExerciseAfterRequest(exerciseUid);
+					checkMap=initfinishedUsersList(classroomId,exerciseUid);
+					if (checkMap!=null) {
+						return getExerciseAfterRequest(exerciseUid);
+					}
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
@@ -185,8 +230,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 	}
 
 	@Override
-	public Map<String, Object> updateStatus(String token, String classroomId, String exerciseId, String hasFinished) {
-		System.out.println(hasFinished);
+	public Map<String, Object> updateStatus(String token, String classroomId, String exerciseId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		Map<String, Object> finishedUsersTemp = new HashMap<>();
 		Map<String, Object> finishedUsersList = new HashMap<>();

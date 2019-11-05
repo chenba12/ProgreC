@@ -18,7 +18,7 @@ public interface ExerciseService {
 
 	public Map<String, Object> getFinishedUsers(String token, String classroomId, String exerciseId);
 
-	public Map<String, Object> updateStatus(String token, String classroomId, String exerciseId, String hasFinished);
+	public Map<String, Object> updateStatus(String token, String classroomId, String exerciseId);
 
 
 }
