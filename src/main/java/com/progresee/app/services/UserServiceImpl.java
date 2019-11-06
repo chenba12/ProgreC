@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
 			DocumentReference documentReference = firestore.collection(USERS).document(uid);
 			ApiFuture<DocumentSnapshot> apiFuture = documentReference.get();
 			DocumentSnapshot documentSnapshot = apiFuture.get();
-			map.put("signedIn", Calendar.getInstance().getTime());
+			map.put("signedIn", Calendar.getInstance().getTime().toString());
 			if (documentSnapshot.exists()) {
 				ApiFuture<WriteResult> updatedDocumentReference = firestore.collection(USERS).document(uid).update(map);
 				if (updatedDocumentReference != null) {
@@ -70,8 +70,8 @@ public class UserServiceImpl implements UserService {
 				}
 			} else {
 				User user = new User();
-				user.setDateCreated(Calendar.getInstance().getTime());
-				user.setSignedIn(Calendar.getInstance().getTime());
+				user.setDateCreated(Calendar.getInstance().getTime().toString());
+				user.setSignedIn(Calendar.getInstance().getTime().toString());
 				user.setFullName(decodedToken.getName());
 				user.setEmail(decodedToken.getEmail());
 				user.setProfilePictureUrl(decodedToken.getPicture());
@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
 			DocumentReference documentReference = firestore.collection(USERS).document(uid);
 			ApiFuture<DocumentSnapshot> apiFuture = documentReference.get();
 			DocumentSnapshot documentSnapshot = apiFuture.get();
-			map.put("signedIn", Calendar.getInstance().getTime());
+			map.put("signedIn", Calendar.getInstance().getTime().toString());
 			if (documentSnapshot.exists()) {
 				ApiFuture<WriteResult> updatedDocumentReference = firestore.collection(USERS).document(uid).update(map);
 				if (updatedDocumentReference != null) {
@@ -107,8 +107,8 @@ public class UserServiceImpl implements UserService {
 				}
 			} else {
 				User user = new User();
-				user.setDateCreated(Calendar.getInstance().getTime());
-				user.setSignedIn(Calendar.getInstance().getTime());
+				user.setDateCreated(Calendar.getInstance().getTime().toString());
+				user.setSignedIn(Calendar.getInstance().getTime().toString());
 				user.setFullName(decodedToken.getName());
 				user.setEmail(decodedToken.getEmail());
 				user.setProfilePictureUrl(decodedToken.getPicture());
@@ -211,7 +211,7 @@ public class UserServiceImpl implements UserService {
 		classroom.setNumberOfTasks(0);
 		classroom.setOwner(owner);
 		classroom.setNumberOfUsers(1);
-		classroom.setDateCreated(Calendar.getInstance().getTime());
+		classroom.setDateCreated(Calendar.getInstance().getTime().toString());
 		classroom.getUserList().put(uid, owner);
 		classroom.setOwnerUid(uid);
 		String classroomUid = UUID.randomUUID().toString().replace("-", "");

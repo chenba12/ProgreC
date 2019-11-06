@@ -14,8 +14,6 @@ import com.google.cloud.firestore.WriteResult;
 import com.progresee.app.beans.Task;
 import com.progresee.app.services.dao.TaskService;
 import com.progresee.app.utils.ResponseUtils;
-
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -23,7 +21,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -113,7 +110,7 @@ public class TaskServiceImpl implements TaskService {
 		if (userService.checkOwnerShip(classroomId, uid)) {
 			try {
 			Task task=new Task();
-			task.setStartDate(Calendar.getInstance().getTime());
+			task.setStartDate(Calendar.getInstance().getTime().toString());
 			String taskUid = UUID.randomUUID().toString().replace("-", "");
 			task.setUid(taskUid);
 			task.setClassroomUid(classroomId);
@@ -127,7 +124,7 @@ public class TaskServiceImpl implements TaskService {
 			Date formatedDate=new SimpleDateFormat("dd/MM/yyyy").parse(date);  
 			
 			
-			task.setEndDate(formatedDate);
+			task.setEndDate(Calendar.getInstance().getTime().toString());
 			ApiFuture<WriteResult> docRef = firestore.collection(TASKS).document(taskUid).set(task);
 				WriteResult writeResult = docRef.get();
 				if (writeResult != null) {

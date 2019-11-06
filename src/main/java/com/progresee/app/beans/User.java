@@ -14,7 +14,7 @@ public class User {
 	private String email;
 	private String fullName;
 	private String profilePictureUrl;
-	private Date dateCreated;
-	private Date signedIn;
+	private String dateCreated;
+	private String signedIn;
 
 }

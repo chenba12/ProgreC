@@ -16,7 +16,7 @@ public class Classroom {
 	private String owner;
 	private String description;
 	private int numberOfTasks;
-	private Date dateCreated;
+	private String dateCreated;
 	private int numberOfUsers;
 	private Map<String,String> userList = new Hashtable<String, String>();
 	private String ownerUid;

@@ -14,8 +14,8 @@ public class Task {
 	private String title;
 	private String description;
 	private String referenceLink;
-	private Date startDate;
-	private Date endDate;
+	private String startDate;
+	private String endDate;
 	private String classroomUid;
 	private boolean status;
 	

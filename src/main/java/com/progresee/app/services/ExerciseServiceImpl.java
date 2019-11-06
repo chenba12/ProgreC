@@ -164,7 +164,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 		if (userService.checkOwnerShip(classroomId, uid)) {
 			System.out.println("checkedOwnership 1");
 			Exercise exercise = new Exercise();
-			exercise.setDateCreated(Calendar.getInstance().getTime());
+			exercise.setDateCreated(Calendar.getInstance().getTime().toString());
 			exercise.setTaskUid(taskId);
 			exercise.setFinishedUsersList(new Hashtable<String, Object>());
 			String exerciseUid = UUID.randomUUID().toString().replace("-", "");
