@@ -291,13 +291,15 @@ public class UserServiceImpl implements UserService {
 			DocumentSnapshot documentSnapshot = documentReference.get();
 			if (documentSnapshot.exists()) {
 				Map<String, String> users = (Map<String, String>) documentSnapshot.get("userList");
-				for (String user : users.keySet()) {
-					System.out.println(user);
-					DocumentReference docRef2 = firestore.collection(USERS).document(user);
+				for (String userUid : users.keySet()) {
+					System.out.println(userUid);
+					DocumentReference docRef2 = firestore.collection(USERS).document(userUid);
 					ApiFuture<DocumentSnapshot> documentReference2 = docRef2.get();
 					DocumentSnapshot documentSnapshot2 = documentReference2.get();
 					if (documentSnapshot2.exists()) {
-						userMap.put(user, documentSnapshot2.getData());
+						User tempUser=documentSnapshot2.toObject(User.class);
+						System.out.println(tempUser);
+						userMap.put(userUid, tempUser);
 					}
 				}
 				return userMap;

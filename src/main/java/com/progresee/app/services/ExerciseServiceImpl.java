@@ -108,7 +108,6 @@ public class ExerciseServiceImpl implements ExerciseService {
 	public Map<String, Object> initFinishedUsersList(String classroomId, String exerciseId) {
 		System.out.println("checkedOwnership 9");
 		Map<String, String> usersInClassroom = new HashMap<>();
-		Map<String, Object> finishedUsersList = new HashMap<>();
 		Map<String, Object> finishedUsersTemp = new HashMap<>();
 		Map<String, Object> finishedUsersToSave = new HashMap<>();
 		usersInClassroom = userService.getUsersInClassroomNoToken(classroomId);
@@ -252,7 +251,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 							.set(finishedUsersList, SetOptions.merge());
 					WriteResult writeResult = write.get();
 					if (writeResult != null) {
-						return ResponseUtils.generateSuccessString("Update successfully");
+						return getExerciseAfterRequest(exerciseId);
 					}
 				}
 			
