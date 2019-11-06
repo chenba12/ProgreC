@@ -106,14 +106,11 @@ public class ExerciseServiceImpl implements ExerciseService {
 	}
 
 	public Map<String, Object> initFinishedUsersList(String classroomId, String exerciseId) {
-		System.out.println("checkedOwnership 9");
 		Map<String, String> usersInClassroom = new HashMap<>();
 		Map<String, Object> finishedUsersTemp = new HashMap<>();
 		Map<String, Object> finishedUsersToSave = new HashMap<>();
 		usersInClassroom = userService.getUsersInClassroomNoToken(classroomId);
 		try {
-			System.out.println("checkedOwnership 10");
-			System.out.println("exist");
 			for (String email : usersInClassroom.values()) {
 				finishedUsersTemp.put(email, "N/A");
 			}
@@ -170,19 +167,12 @@ public class ExerciseServiceImpl implements ExerciseService {
 			String exerciseUid = UUID.randomUUID().toString().replace("-", "");
 			exercise.setUid(exerciseUid);
 			exercise.setExerciseTitle(description);
-			System.out.println("checkedOwnership 2");
 			ApiFuture<WriteResult> docRef = firestore.collection(EXERCISES).document(exerciseUid).set(exercise);
-			System.out.println("checkedOwnership 3");
 			try {
-				System.out.println("checkedOwnership 4");
 				WriteResult writeResult = docRef.get();
-				System.out.println("checkedOwnership 5");
 				if (writeResult != null) {
-					System.out.println("checkedOwnership 6");
 					checkMap = initFinishedUsersList(classroomId, exerciseUid);
-					System.out.println("checkedOwnership 7");
 					if (checkMap != null) {
-						System.out.println("checkedOwnership 8");
 						return getExerciseAfterRequest(exerciseUid);
 					}
 				}
