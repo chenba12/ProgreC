@@ -1,6 +1,7 @@
 package com.progresee.app.services;
 
 import java.util.Calendar;
+
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.google.api.core.ApiFuture;
+import com.google.cloud.Date;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
@@ -142,13 +144,14 @@ public class ExerciseServiceImpl implements ExerciseService {
 			for (Exercise exercise : tempExercises) {
 				exercises.put(exercise.getUid(), exercise);
 			}
-			return exercises;
-
+			if (!exercises.isEmpty()) {				
+				return exercises;
+			}
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
 		response.setStatus(ResponseUtils.BAD_REQUEST);
-		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM,
+		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NO_EXERCISES_AVAILABLE,
 				"/getAllExercises");
 	}
 
@@ -161,7 +164,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 		if (userService.checkOwnerShip(classroomId, uid)) {
 			System.out.println("checkedOwnership 1");
 			Exercise exercise = new Exercise();
-			exercise.setDateCreated(Calendar.getInstance().getTime().toString());
+			exercise.setDateCreated(DateUtils.formatDate());
 			exercise.setTaskUid(taskId);
 			exercise.setFinishedUsersList(new Hashtable<String, Object>());
 			String exerciseUid = UUID.randomUUID().toString().replace("-", "");
@@ -231,7 +234,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 			if (documentSnapshot.exists()) {
 				finishedUsersTemp = (Map<String, Object>) documentSnapshot.get("finishedUsersList");
 					if (finishedUsersTemp.get(email).equals("N/A")) {
-						finishedUsersTemp.put(email, Calendar.getInstance().getTime().toString());
+						finishedUsersTemp.put(email, DateUtils.formatDate());
 					} else {
 						finishedUsersTemp.put(email, "N/A");
 					}
