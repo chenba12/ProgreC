@@ -127,6 +127,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 		usersInClassroom = userService.getUsersInClassroomNoToken(classroomId);
 		try {
 			System.out.println("usersInClassroom -> " + usersInClassroom);
+			System.out.println("admin 1" + admin1);
 			for (String email : usersInClassroom.values()) {
 				if (!email.equalsIgnoreCase(admin1) || !email.equalsIgnoreCase(admin2)
 						|| !email.equalsIgnoreCase(admin3)) {
