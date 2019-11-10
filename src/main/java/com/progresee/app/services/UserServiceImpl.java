@@ -1,6 +1,7 @@
 package com.progresee.app.services;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -25,6 +26,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import com.progresee.app.beans.Classroom;
+import com.progresee.app.beans.Exercise;
+import com.progresee.app.beans.Task;
 import com.progresee.app.beans.User;
 import com.progresee.app.services.dao.UserService;
 import com.progresee.app.utils.ResponseUtils;
@@ -34,12 +37,16 @@ public class UserServiceImpl implements UserService {
 
 	private static final String USERS = "users";
 	private static final String CLASSROOMS = "classrooms";
+	private static final String TASKS = "tasks";
 
 	@Autowired
-	Firestore firestore;
+	private Firestore firestore;
 
 	@Autowired
-	HttpServletResponse response;
+	private HttpServletResponse response;
+
+	@Autowired
+	private TaskServiceImpl taskServiceImpl;
 
 	@PostConstruct
 	public void initDB() {
@@ -53,7 +60,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public ResponseEntity<Object> getUser(String token) {
-		
+
 		try {
 			FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
 			String uid = decodedToken.getUid();
@@ -95,7 +102,7 @@ public class UserServiceImpl implements UserService {
 			DocumentReference documentReference = firestore.collection(USERS).document(uid);
 			ApiFuture<DocumentSnapshot> apiFuture = documentReference.get();
 			DocumentSnapshot documentSnapshot = apiFuture.get();
-			map.put("signedIn",DateUtils.formatDate());
+			map.put("signedIn", DateUtils.formatDate());
 			if (documentSnapshot.exists()) {
 				ApiFuture<WriteResult> updatedDocumentReference = firestore.collection(USERS).document(uid).update(map);
 				if (updatedDocumentReference != null) {
@@ -262,10 +269,21 @@ public class UserServiceImpl implements UserService {
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (checkOwnerShip(classroomId, uid)) {
-			ApiFuture<WriteResult> docRef = firestore.collection(CLASSROOMS).document(classroomId).delete();
+			ApiFuture<WriteResult> docRef = firestore.collection(CLASSROOMS).document(classroomId).update("isArchived",
+					true);
 			try {
 				WriteResult writeResult = docRef.get();
 				if (writeResult != null) {
+					Query archiveRef = firestore.collection(TASKS).whereEqualTo("classroomUid", classroomId);
+					ApiFuture<QuerySnapshot> archivedReference = archiveRef.get();
+					QuerySnapshot archivedSnapshot = archivedReference.get();
+					List<Task> tempTasks = archivedSnapshot.toObjects(Task.class);
+					Map<String, Object> tasks = new Hashtable<>();
+					System.out.println("tasks list doomed for archiving --> " + tasks);
+					for (Task task : tempTasks) {
+						System.out.println("task with uid " + task.getUid() + " archived");
+						taskServiceImpl.archiveTaskFromClassrrom(classroomId, task.getUid());
+					}
 					return ResponseUtils.generateSuccessString(classroomId);
 				}
 			} catch (InterruptedException | ExecutionException e) {
@@ -296,7 +314,7 @@ public class UserServiceImpl implements UserService {
 					ApiFuture<DocumentSnapshot> documentReference2 = docRef2.get();
 					DocumentSnapshot documentSnapshot2 = documentReference2.get();
 					if (documentSnapshot2.exists()) {
-						User tempUser=documentSnapshot2.toObject(User.class);
+						User tempUser = documentSnapshot2.toObject(User.class);
 						System.out.println(tempUser);
 						userMap.put(userUid, tempUser);
 					}

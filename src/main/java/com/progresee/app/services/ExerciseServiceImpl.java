@@ -118,7 +118,8 @@ public class ExerciseServiceImpl implements ExerciseService {
 			}
 			System.out.println("finishedUsersTemp--->" + finishedUsersTemp);
 			finishedUsersToSave.put("finishedUsersList", finishedUsersTemp);
-			ApiFuture<WriteResult> write = firestore.collection(EXERCISES).document(exerciseId).set(finishedUsersToSave,SetOptions.merge());
+			ApiFuture<WriteResult> write = firestore.collection(EXERCISES).document(exerciseId).set(finishedUsersToSave,
+					SetOptions.merge());
 			WriteResult writeResult = write.get();
 			if (writeResult != null) {
 				System.out.println("yay");
@@ -144,7 +145,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 			for (Exercise exercise : tempExercises) {
 				exercises.put(exercise.getUid(), exercise);
 			}
-			if (!exercises.isEmpty()) {				
+			if (!exercises.isEmpty()) {
 				return exercises;
 			}
 		} catch (InterruptedException | ExecutionException e) {
@@ -191,17 +192,31 @@ public class ExerciseServiceImpl implements ExerciseService {
 	public Map<String, Object> deleteExercise(String token, String classroomId, String taskId, String exerciseId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
-		ApiFuture<WriteResult> docRef = firestore.collection(EXERCISES).document(exerciseId).delete();
+		ApiFuture<WriteResult> docRef = firestore.collection(EXERCISES).document(exerciseId).update("isArchived", true);
 		try {
 			WriteResult writeResult = docRef.get();
 			if (writeResult != null) {
-				return ResponseUtils.generateSuccessString("Exercise has been deleted");
+				return ResponseUtils.generateSuccessString("Exercise has been archived");
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
 		response.setStatus(ResponseUtils.FORBIDDEN);
 		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.ERROR, "/deleteExercise");
+	}
+	
+	public Map<String, Object> archiveExercisesFromTask(String exerciseId) {
+		ApiFuture<WriteResult> docRef = firestore.collection(EXERCISES).document(exerciseId).update("isArchived", true);
+		try {
+			WriteResult writeResult = docRef.get();
+			if (writeResult != null) {
+				return ResponseUtils.generateSuccessString("Exercise has been archived");
+			}
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		response.setStatus(ResponseUtils.FORBIDDEN);
+		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.ERROR, "/archiveExercises");
 	}
 
 	@Override
@@ -233,21 +248,20 @@ public class ExerciseServiceImpl implements ExerciseService {
 			DocumentSnapshot documentSnapshot = documentReference.get();
 			if (documentSnapshot.exists()) {
 				finishedUsersTemp = (Map<String, Object>) documentSnapshot.get("finishedUsersList");
-					if (finishedUsersTemp.get(email).equals("N/A")) {
-						finishedUsersTemp.put(email, DateUtils.formatDate());
-					} else {
-						finishedUsersTemp.put(email, "N/A");
-					}
-					System.out.println(finishedUsersTemp);
-					finishedUsersList.put("finishedUsersList", finishedUsersTemp);
-					ApiFuture<WriteResult> write = firestore.collection(EXERCISES).document(exerciseId)
-							.set(finishedUsersList, SetOptions.merge());
-					WriteResult writeResult = write.get();
-					if (writeResult != null) {
-						return getExerciseAfterRequest(exerciseId);
-					}
+				if (finishedUsersTemp.get(email).equals("N/A")) {
+					finishedUsersTemp.put(email, DateUtils.formatDate());
+				} else {
+					finishedUsersTemp.put(email, "N/A");
 				}
-			
+				System.out.println(finishedUsersTemp);
+				finishedUsersList.put("finishedUsersList", finishedUsersTemp);
+				ApiFuture<WriteResult> write = firestore.collection(EXERCISES).document(exerciseId)
+						.set(finishedUsersList, SetOptions.merge());
+				WriteResult writeResult = write.get();
+				if (writeResult != null) {
+					return getExerciseAfterRequest(exerciseId);
+				}
+			}
 
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();

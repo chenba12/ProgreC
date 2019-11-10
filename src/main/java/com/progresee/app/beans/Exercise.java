@@ -16,5 +16,7 @@ public class Exercise {
 	private String dateCreated;
 	private Map<String, Object> finishedUsersList;
 	private String taskUid;
+//	private String classroomId;
+	private boolean isArchived;
 
 }
