@@ -52,12 +52,9 @@ public class ExerciseServiceImpl implements ExerciseService {
 		System.out.println("PreDestroy -----> ExerciseService");
 	}
 
-	@Value("progresee.admin1")
-	private String admin1;
-	@Value("progresee.admin2")
-	private String admin2;
-	@Value("progresee.admin3")
-	private String admin3;
+	private static final String ADMIN1 = "hedsean@gmail.com";
+	private static final String ADMIN2 = "chen24201@gmail.com";
+	private static final String ADMIN3 = "kobi.shasha@gmail.com";
 
 	@Override
 	public Map<String, Object> getExercise(String token, String classroomId, String taskId, String exerciseId) {
@@ -94,15 +91,34 @@ public class ExerciseServiceImpl implements ExerciseService {
 			if (documentSnapshot.exists()) {
 				finishedUsersList = (Map<String, Object>) documentSnapshot.get("finishedUsersList");
 				for (String email : usersInClassroom.values()) {
-					if (!email.equalsIgnoreCase(admin1) || !email.equalsIgnoreCase(admin2)
-							|| !email.equalsIgnoreCase(admin3)) {
+					System.out.println(email);
+					System.out.println(ADMIN2);
+					switch (email) {
+					case ADMIN1:
+						break;
+					case ADMIN2:
+						break;
+					case ADMIN3:
+						break;
+					default:
 						finishedUsersTemp.put(email, "N/A");
 					}
 				}
 				if (finishedUsersList.size() > 0) {
 					for (String email : finishedUsersList.keySet()) {
 						if (finishedUsersTemp.containsKey(email)) {
-							finishedUsersTemp.put(email, finishedUsersList.get(email));
+							System.out.println(email);
+							System.out.println(ADMIN2);
+							switch (email) {
+							case ADMIN1:
+								break;
+							case ADMIN2:
+								break;
+							case ADMIN3:
+								break;
+							default:
+								finishedUsersTemp.put(email, finishedUsersList.get(email));
+							}
 						}
 					}
 				}
@@ -127,12 +143,8 @@ public class ExerciseServiceImpl implements ExerciseService {
 		usersInClassroom = userService.getUsersInClassroomNoToken(classroomId);
 		try {
 			System.out.println("usersInClassroom -> " + usersInClassroom);
-			System.out.println("admin 1" + admin1);
 			for (String email : usersInClassroom.values()) {
-				if (!email.equalsIgnoreCase(admin1) || !email.equalsIgnoreCase(admin2)
-						|| !email.equalsIgnoreCase(admin3)) {
-					finishedUsersTemp.put(email, "N/A");
-				}
+				finishedUsersTemp.put(email, "N/A");
 			}
 			System.out.println("finishedUsersTemp--->" + finishedUsersTemp);
 			finishedUsersToSave.put("finishedUsersList", finishedUsersTemp);
@@ -140,7 +152,6 @@ public class ExerciseServiceImpl implements ExerciseService {
 					SetOptions.merge());
 			WriteResult writeResult = write.get();
 			if (writeResult != null) {
-				System.out.println("yay");
 				return finishedUsersTemp;
 			}
 

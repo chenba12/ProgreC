@@ -22,7 +22,6 @@ public class FirebaseConfig {
     }
 
 
-
 	@Value("${progresee.path}")
 	String path;
 
