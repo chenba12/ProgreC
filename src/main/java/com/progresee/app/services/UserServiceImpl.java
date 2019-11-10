@@ -30,6 +30,7 @@ import com.progresee.app.beans.Exercise;
 import com.progresee.app.beans.Task;
 import com.progresee.app.beans.User;
 import com.progresee.app.services.dao.UserService;
+import com.progresee.app.utils.DateUtils;
 import com.progresee.app.utils.ResponseUtils;
 
 @Service
@@ -216,6 +217,7 @@ public class UserServiceImpl implements UserService {
 		classroom.setDescription(description);
 		classroom.setNumberOfTasks(0);
 		classroom.setOwner(owner);
+		classroom.setArchived(false);
 		classroom.setNumberOfUsers(1);
 		classroom.setDateCreated(DateUtils.formatDate());
 		classroom.getUserList().put(uid, owner);
@@ -269,7 +271,7 @@ public class UserServiceImpl implements UserService {
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (checkOwnerShip(classroomId, uid)) {
-			ApiFuture<WriteResult> docRef = firestore.collection(CLASSROOMS).document(classroomId).update("isArchived",
+			ApiFuture<WriteResult> docRef = firestore.collection(CLASSROOMS).document(classroomId).update("archived",
 					true);
 			try {
 				WriteResult writeResult = docRef.get();

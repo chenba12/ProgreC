@@ -24,6 +24,7 @@ import com.google.cloud.firestore.SetOptions;
 import com.google.cloud.firestore.WriteResult;
 import com.progresee.app.beans.Exercise;
 import com.progresee.app.services.dao.ExerciseService;
+import com.progresee.app.utils.DateUtils;
 import com.progresee.app.utils.ResponseUtils;
 
 @Service
@@ -167,6 +168,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 			Exercise exercise = new Exercise();
 			exercise.setDateCreated(DateUtils.formatDate());
 			exercise.setTaskUid(taskId);
+			exercise.setArchived(false);
 			exercise.setFinishedUsersList(new Hashtable<String, Object>());
 			String exerciseUid = UUID.randomUUID().toString().replace("-", "");
 			exercise.setUid(exerciseUid);
@@ -192,7 +194,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 	public Map<String, Object> deleteExercise(String token, String classroomId, String taskId, String exerciseId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
-		ApiFuture<WriteResult> docRef = firestore.collection(EXERCISES).document(exerciseId).update("isArchived", true);
+		ApiFuture<WriteResult> docRef = firestore.collection(EXERCISES).document(exerciseId).update("archived", true);
 		try {
 			WriteResult writeResult = docRef.get();
 			if (writeResult != null) {
@@ -206,7 +208,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 	}
 	
 	public Map<String, Object> archiveExercisesFromTask(String exerciseId) {
-		ApiFuture<WriteResult> docRef = firestore.collection(EXERCISES).document(exerciseId).update("isArchived", true);
+		ApiFuture<WriteResult> docRef = firestore.collection(EXERCISES).document(exerciseId).update("archived", true);
 		try {
 			WriteResult writeResult = docRef.get();
 			if (writeResult != null) {

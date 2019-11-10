@@ -17,8 +17,8 @@ public class Task {
 	private String startDate;
 	private String endDate;
 	private String classroomUid;
-	private boolean status;
-	private boolean isArchived;
+	private boolean completed;
+	private boolean archived;
 	
 
 }

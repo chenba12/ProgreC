@@ -21,6 +21,6 @@ public class Classroom {
 	private Map<String,String> userList = new Hashtable<String, String>();
 	private String ownerUid;
 	private String uid;
-	private boolean isArchived;
+	private boolean archived;
 
 }

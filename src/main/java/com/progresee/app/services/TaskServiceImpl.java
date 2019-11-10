@@ -14,6 +14,7 @@ import com.google.cloud.firestore.WriteResult;
 import com.progresee.app.beans.Exercise;
 import com.progresee.app.beans.Task;
 import com.progresee.app.services.dao.TaskService;
+import com.progresee.app.utils.DateUtils;
 import com.progresee.app.utils.ResponseUtils;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -114,8 +115,9 @@ public class TaskServiceImpl implements TaskService {
 				task.setStartDate(DateUtils.formatDate());
 				String taskUid = UUID.randomUUID().toString().replace("-", "");
 				task.setUid(taskUid);
+				task.setArchived(false);
 				task.setClassroomUid(classroomId);
-				task.setStatus(true);
+				task.setCompleted(false);
 				task.setTitle(title);
 				task.setDescription(description);
 				if (link != null) {
@@ -156,7 +158,7 @@ public class TaskServiceImpl implements TaskService {
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkOwnerShip(classroomId, uid)) {
-			ApiFuture<WriteResult> docRef = firestore.collection(TASKS).document(taskId).update("isArchived", true);
+			ApiFuture<WriteResult> docRef = firestore.collection(TASKS).document(taskId).update("archived", true);
 			try {
 				DocumentReference getRef = firestore.collection(TASKS).document(taskId);
 				ApiFuture<DocumentSnapshot> documentReference = getRef.get();
@@ -186,7 +188,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 	
 	public Map<String, Object> archiveTaskFromClassrrom(String classroomId, String taskId) {
-			ApiFuture<WriteResult> docRef = firestore.collection(TASKS).document(taskId).update("isArchived", true);
+			ApiFuture<WriteResult> docRef = firestore.collection(TASKS).document(taskId).update("archived", true);
 			try {
 				DocumentReference getRef = firestore.collection(TASKS).document(taskId);
 				ApiFuture<DocumentSnapshot> documentReference = getRef.get();
