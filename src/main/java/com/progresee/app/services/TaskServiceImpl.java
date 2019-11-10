@@ -81,7 +81,7 @@ public class TaskServiceImpl implements TaskService {
 				"/getAllTasks");
 	}
 
-	public Map<String, Object> getAllTasksForUserAddedWrongly(String classroomId, String newUserEmail) {
+	public void getAllTasksForUserAddedWrongly(String classroomId, String newUserEmail) {
 		try {
 			Query docRef = firestore.collection(TASKS).whereEqualTo("classroomUid", classroomId);
 			ApiFuture<QuerySnapshot> documentReference = docRef.get();
@@ -89,8 +89,10 @@ public class TaskServiceImpl implements TaskService {
 			List<Task> tempTasks = documentSnapshot.toObjects(Task.class);
 			Map<String, Exercise> tempExercises = new HashMap<>();
 			if (!tempTasks.isEmpty()) {
+				System.out.println(tempTasks+" NOT EMPTY");
 				for (Task task : tempTasks) {
 					tempExercises = exerciseService.getAllExercisesForUserAddedWrongly(task.getUid());
+					System.out.println(tempExercises+" THIS IS TEMP");
 					for (Exercise exercise : tempExercises.values()) {
 						exerciseService.initFinishedUsersList(classroomId, exercise.getUid());
 					}
@@ -99,9 +101,6 @@ public class TaskServiceImpl implements TaskService {
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
-		response.setStatus(ResponseUtils.BAD_REQUEST);
-		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM,
-				"/getAllTasks");
 	}
 
 	@Override

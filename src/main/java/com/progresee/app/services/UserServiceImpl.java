@@ -185,7 +185,6 @@ public class UserServiceImpl implements UserService {
 			ApiFuture<QuerySnapshot> documentReference = docRef.get();
 			QuerySnapshot documentSnapshot = documentReference.get();
 			List<Classroom> tempClassrooms = documentSnapshot.toObjects(Classroom.class);
-
 			Map<String, Object> classrooms = new HashMap<>();
 			for (Classroom classroom : tempClassrooms) {
 				if (classroom.getUserList().containsKey(uid)) {
@@ -370,9 +369,7 @@ public class UserServiceImpl implements UserService {
 	public Map<String, Object> addToClassroom(String token, String classroomId, String email) {
 		Map<String, Object> map = findCurrentUser(token);
 		Map<String, Object> valuesMap = new HashMap<>();
-		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
-		if (checkOwnerShip(classroomId, uid)) {
 			Query query = firestore.collection(USERS).whereEqualTo("email", email);
 			try {
 				QuerySnapshot querySnapshot = query.get().get();
@@ -389,13 +386,13 @@ public class UserServiceImpl implements UserService {
 							.set(valuesMap, SetOptions.merge());
 					WriteResult writeResult = docRef.get();
 					if (writeResult != null) {
+						taskServiceImpl.getAllTasksForUserAddedWrongly(classroomId, email);
 						return getClassroomAfterRequest(classroomId);
 					}
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
-		}
 
 		response.setStatus(ResponseUtils.FORBIDDEN);
 		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.OWNER, "/addToClassroom");
@@ -449,7 +446,7 @@ public class UserServiceImpl implements UserService {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
-		if (checkIfUserIsPartOfClassroom(classroomId, uid)) {
+		if (checkIfUserIsPartOfClassroom(classroomId, userId)) {
 			try {
 				Map<String, Object> userList = new HashMap<>();
 				DocumentReference getListRef = firestore.collection(CLASSROOMS).document(classroomId);
@@ -460,13 +457,15 @@ public class UserServiceImpl implements UserService {
 					if (existingMap.containsKey(userId)) {
 						existingMap.remove(userId);
 						userList.put("userList", existingMap);
-						ApiFuture<WriteResult> writeExisting = firestore.collection(CLASSROOMS).document(classroomId).update("userList", userList);
+						ApiFuture<WriteResult> writeExisting = firestore.collection(CLASSROOMS).document(classroomId)
+								.update(userList);
 						WriteResult writeResult = writeExisting.get();
 						if (writeResult != null) {
 							ApiFuture<WriteResult> writeNumberOfUsers = firestore.collection(CLASSROOMS)
 									.document(classroomId).update("numberOfUsers", FieldValue.increment(-1));
 							WriteResult writeNumberOfUsersResults = writeNumberOfUsers.get();
 							if (writeNumberOfUsersResults != null) {
+//								taskServiceImpl.getAllTasksForUserAddedWrongly(classroomId, newUserEmail);
 								return ResponseUtils.generateSuccessString("You left the classroom sucessfully");
 							}
 						}

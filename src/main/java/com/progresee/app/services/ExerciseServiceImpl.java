@@ -137,6 +137,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 	}
 
 	public Map<String, Object> initFinishedUsersList(String classroomId, String exerciseId) {
+		System.out.println("we in");
 		Map<String, String> usersInClassroom = new HashMap<>();
 		Map<String, Object> finishedUsersTemp = new HashMap<>();
 		Map<String, Object> finishedUsersToSave = new HashMap<>();
