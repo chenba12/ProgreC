@@ -81,6 +81,29 @@ public class TaskServiceImpl implements TaskService {
 				"/getAllTasks");
 	}
 
+	public Map<String, Object> getAllTasksForUserAddedWrongly(String classroomId, String newUserEmail) {
+		try {
+			Query docRef = firestore.collection(TASKS).whereEqualTo("classroomUid", classroomId);
+			ApiFuture<QuerySnapshot> documentReference = docRef.get();
+			QuerySnapshot documentSnapshot = documentReference.get();
+			List<Task> tempTasks = documentSnapshot.toObjects(Task.class);
+			Map<String, Exercise> tempExercises = new HashMap<>();
+			if (!tempTasks.isEmpty()) {
+				for (Task task : tempTasks) {
+					tempExercises = exerciseService.getAllExercisesForUserAddedWrongly(task.getUid());
+					for (Exercise exercise : tempExercises.values()) {
+						exerciseService.initFinishedUsersList(classroomId, exercise.getUid());
+					}
+				}
+			}
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		response.setStatus(ResponseUtils.BAD_REQUEST);
+		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM,
+				"/getAllTasks");
+	}
+
 	@Override
 	public Map<String, Object> getTask(String token, String classroomId, String taskId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
@@ -186,36 +209,35 @@ public class TaskServiceImpl implements TaskService {
 		response.setStatus(ResponseUtils.FORBIDDEN);
 		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.OWNER, "/deleteTask");
 	}
-	
+
 	public Map<String, Object> archiveTaskFromClassrrom(String classroomId, String taskId) {
-			ApiFuture<WriteResult> docRef = firestore.collection(TASKS).document(taskId).update("archived", true);
-			try {
-				DocumentReference getRef = firestore.collection(TASKS).document(taskId);
-				ApiFuture<DocumentSnapshot> documentReference = getRef.get();
-				DocumentSnapshot documentSnapshot = documentReference.get();
-				if (documentSnapshot.exists()) {
-					ApiFuture<WriteResult> removeTask = firestore.collection("classrooms").document(classroomId)
-							.update("numberOfTasks", FieldValue.increment(-1));
-					removeTask.get();
-					Query archiveRef = firestore.collection(EXERCISES).whereEqualTo("taskUid", taskId);
-					ApiFuture<QuerySnapshot> archivedReference = archiveRef.get();
-					QuerySnapshot archivedSnapshot = archivedReference.get();
-					List<Exercise> tempExercises = archivedSnapshot.toObjects(Exercise.class);
-					Map<String, Object> exercises = new Hashtable<>();
-					System.out.println("exercises list doomed for archiving --> " + exercises);
-					for (Exercise exercise : tempExercises) {
-						System.out.println("exercise with uid " + exercise.getUid() + " archived");
-						exerciseService.archiveExercisesFromTask(exercise.getUid());
-					}
-					return ResponseUtils.generateSuccessString("Task has been archived");
+		ApiFuture<WriteResult> docRef = firestore.collection(TASKS).document(taskId).update("archived", true);
+		try {
+			DocumentReference getRef = firestore.collection(TASKS).document(taskId);
+			ApiFuture<DocumentSnapshot> documentReference = getRef.get();
+			DocumentSnapshot documentSnapshot = documentReference.get();
+			if (documentSnapshot.exists()) {
+				ApiFuture<WriteResult> removeTask = firestore.collection("classrooms").document(classroomId)
+						.update("numberOfTasks", FieldValue.increment(-1));
+				removeTask.get();
+				Query archiveRef = firestore.collection(EXERCISES).whereEqualTo("taskUid", taskId);
+				ApiFuture<QuerySnapshot> archivedReference = archiveRef.get();
+				QuerySnapshot archivedSnapshot = archivedReference.get();
+				List<Exercise> tempExercises = archivedSnapshot.toObjects(Exercise.class);
+				Map<String, Object> exercises = new Hashtable<>();
+				System.out.println("exercises list doomed for archiving --> " + exercises);
+				for (Exercise exercise : tempExercises) {
+					System.out.println("exercise with uid " + exercise.getUid() + " archived");
+					exerciseService.archiveExercisesFromTask(exercise.getUid());
 				}
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
+				return ResponseUtils.generateSuccessString("Task has been archived");
 			}
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
 		response.setStatus(ResponseUtils.FORBIDDEN);
 		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.OWNER, "/deleteTask");
 	}
-
 
 	@Override
 	public Map<String, Object> updateTask(String token, String classroomId, Task task) {

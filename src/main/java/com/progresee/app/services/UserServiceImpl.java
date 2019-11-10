@@ -457,11 +457,10 @@ public class UserServiceImpl implements UserService {
 				DocumentSnapshot documentSnapshot = documentReference.get();
 				if (documentSnapshot.exists()) {
 					Map<String, Object> existingMap = (Map<String, Object>) documentSnapshot.get("userList");
-					if (existingMap.containsKey(uid)) {
-						existingMap.remove(uid);
+					if (existingMap.containsKey(userId)) {
+						existingMap.remove(userId);
 						userList.put("userList", existingMap);
-						ApiFuture<WriteResult> writeExisting = firestore.collection(CLASSROOMS).document(classroomId)
-								.set(userList);
+						ApiFuture<WriteResult> writeExisting = firestore.collection(CLASSROOMS).document(classroomId).update("userList", userList);
 						WriteResult writeResult = writeExisting.get();
 						if (writeResult != null) {
 							ApiFuture<WriteResult> writeNumberOfUsers = firestore.collection(CLASSROOMS)
@@ -473,7 +472,6 @@ public class UserServiceImpl implements UserService {
 						}
 					}
 				}
-
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}

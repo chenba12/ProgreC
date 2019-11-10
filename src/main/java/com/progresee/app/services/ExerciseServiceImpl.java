@@ -185,6 +185,26 @@ public class ExerciseServiceImpl implements ExerciseService {
 				"/getAllExercises");
 	}
 
+	public Map<String, Exercise> getAllExercisesForUserAddedWrongly(String taskId) {
+		Query docRef = firestore.collection(EXERCISES).whereEqualTo("taskUid", taskId);
+		try {
+			ApiFuture<QuerySnapshot> documentReference = docRef.get();
+			QuerySnapshot documentSnapshot = documentReference.get();
+			List<Exercise> tempExercises = documentSnapshot.toObjects(Exercise.class);
+			Map<String, Exercise> exercises = new HashMap<>();
+			for (Exercise exercise : tempExercises) {
+				exercises.put(exercise.getUid(), exercise);
+			}
+			if (!exercises.isEmpty()) {
+				return exercises;
+			}
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		return null;
+		
+	}
+
 	@Override
 	public Map<String, Object> createExercise(String token, String classroomId, String taskId, String description) {
 		Map<String, Object> map = userService.findCurrentUser(token);
@@ -192,7 +212,6 @@ public class ExerciseServiceImpl implements ExerciseService {
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkOwnerShip(classroomId, uid)) {
-			System.out.println("checkedOwnership 1");
 			Exercise exercise = new Exercise();
 			exercise.setDateCreated(DateUtils.formatDate());
 			exercise.setTaskUid(taskId);
