@@ -13,6 +13,8 @@ import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.google.api.client.util.Value;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.Date;
 import com.google.cloud.firestore.DocumentReference;
@@ -50,6 +52,13 @@ public class ExerciseServiceImpl implements ExerciseService {
 		System.out.println("PreDestroy -----> ExerciseService");
 	}
 
+	@Value("progresee.admin1")
+	private String admin1;
+	@Value("progresee.admin2")
+	private String admin2;
+	@Value("progresee.admin3")
+	private String admin3;
+
 	@Override
 	public Map<String, Object> getExercise(String token, String classroomId, String taskId, String exerciseId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
@@ -85,7 +94,10 @@ public class ExerciseServiceImpl implements ExerciseService {
 			if (documentSnapshot.exists()) {
 				finishedUsersList = (Map<String, Object>) documentSnapshot.get("finishedUsersList");
 				for (String email : usersInClassroom.values()) {
-					finishedUsersTemp.put(email, "N/A");
+					if (!email.equalsIgnoreCase(admin1) || !email.equalsIgnoreCase(admin2)
+							|| !email.equalsIgnoreCase(admin3)) {
+						finishedUsersTemp.put(email, "N/A");
+					}
 				}
 				if (finishedUsersList.size() > 0) {
 					for (String email : finishedUsersList.keySet()) {
@@ -114,8 +126,12 @@ public class ExerciseServiceImpl implements ExerciseService {
 		Map<String, Object> finishedUsersToSave = new HashMap<>();
 		usersInClassroom = userService.getUsersInClassroomNoToken(classroomId);
 		try {
+			System.out.println("usersInClassroom -> " + usersInClassroom);
 			for (String email : usersInClassroom.values()) {
-				finishedUsersTemp.put(email, "N/A");
+				if (!email.equalsIgnoreCase(admin1) || !email.equalsIgnoreCase(admin2)
+						|| !email.equalsIgnoreCase(admin3)) {
+					finishedUsersTemp.put(email, "N/A");
+				}
 			}
 			System.out.println("finishedUsersTemp--->" + finishedUsersTemp);
 			finishedUsersToSave.put("finishedUsersList", finishedUsersTemp);
@@ -206,7 +222,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 		response.setStatus(ResponseUtils.FORBIDDEN);
 		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.ERROR, "/deleteExercise");
 	}
-	
+
 	public Map<String, Object> archiveExercisesFromTask(String exerciseId) {
 		ApiFuture<WriteResult> docRef = firestore.collection(EXERCISES).document(exerciseId).update("archived", true);
 		try {
