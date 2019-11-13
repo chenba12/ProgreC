@@ -3,6 +3,7 @@ package com.progresee.app.controllers;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,14 +35,14 @@ public class TaskController {
 
 	// http://localhost:5000/task/getTask?{classroomId}/{taskId}
 	@GetMapping("/getTask")
-	public Map<String, Object> getTask(@RequestHeader("Authorization") String token, @RequestParam String classroomId,
+	public ResponseEntity<Object> getTask(@RequestHeader("Authorization") String token, @RequestParam String classroomId,
 			@RequestParam String taskId) {
 		return taskService.getTask(token, classroomId, taskId);
 	}
 
 	// http://localhost:5000/task/createTask?{classroomId}
 	@PostMapping("/createTask")
-	public Map<String, Object> createTask(@RequestHeader("Authorization") String token,
+	public ResponseEntity<Object> createTask(@RequestHeader("Authorization") String token,
 			@RequestParam String classroomId, @RequestParam String title,@RequestParam String description,@RequestParam String link,@RequestParam String date) {
 			return taskService.createTask(token, classroomId,title,description,link,date);
 
@@ -49,14 +50,14 @@ public class TaskController {
 
 	// http://localhost:5000/task/delete?{classroomId}
 	@DeleteMapping("/deleteTask")
-	public Map<String, Object> deleteTask(@RequestHeader("Authorization") String token,
+	public ResponseEntity<Object> deleteTask(@RequestHeader("Authorization") String token,
 			@RequestParam String classroomId, @RequestParam String taskId) {
 		return taskService.deleteTask(token, classroomId, taskId);
 	}
 
 	// http://localhost:5000/task/update?{classroomId}
 	@PutMapping("/updateTask")
-	public Map<String, Object> updateTask(@RequestHeader("Authorization") String token,
+	public ResponseEntity<Object> updateTask(@RequestHeader("Authorization") String token,
 			@RequestParam String classroomId, @RequestBody Task task) {
 		if (NullCheckerUtils.taskNullChecker(task)) {
 			return taskService.updateTask(token, classroomId, task);

@@ -34,17 +34,9 @@ public class UserController {
 		return service.getUser(token);
 	}
 
-	// http://localhost:5000/user/updateUser
-	@PutMapping("/updateUser")
-	public Map<String, Object> updateUser(@RequestHeader("Authorization") String token, @RequestBody User user) {
-		if (NullCheckerUtils.userNullChecker(user)) {
-			return service.updateUser(token, user);
-		}
-		return null;
-	}
 
 	@GetMapping("/getClassroom")
-	public Map<String, Object> getClassroom(@RequestHeader("Authorization") String token,
+	public ResponseEntity<Object> getClassroom(@RequestHeader("Authorization") String token,
 			@RequestParam String classroomId) {
 		return service.getClassroom(token, classroomId);
 	}
@@ -56,20 +48,20 @@ public class UserController {
 
 	// http://localhost:5000/user/createClassroom
 	@PostMapping("/createClassroom")
-	public Map<String, Object> createClassroom(@RequestHeader("Authorization") String token,
+	public ResponseEntity<Object> createClassroom(@RequestHeader("Authorization") String token,
 			@RequestParam String name,@RequestParam String description) {
 		return service.createClassroom(token, name,description);
 	}
 
 	@PutMapping("/updateClassroom")
-	public Map<String, Object> updateClassroom(@RequestHeader("Authorization") String token,
+	public ResponseEntity<Object> updateClassroom(@RequestHeader("Authorization") String token,
 			@RequestParam String classroomId, @RequestParam String name,@RequestParam String description) {
 		return service.updateClassroom(token, classroomId, name,description);
 
 	}
 
 	@DeleteMapping("/deleteClassroom")
-	public Map<String, Object> deleteClassroom(@RequestHeader("Authorization") String token,
+	public ResponseEntity<Object> deleteClassroom(@RequestHeader("Authorization") String token,
 			@RequestParam String classroomId) {
 		return service.deleteClassroom(token, classroomId);
 	}
@@ -81,28 +73,28 @@ public class UserController {
 	}
 
 	@PutMapping("/transferClassroom")
-	public Map<String, Object> transferClassroom(@RequestHeader("Authorization") String token,
+	public ResponseEntity<Object> transferClassroom(@RequestHeader("Authorization") String token,
 			@RequestParam String classroomId, @RequestParam String newOwnerId) {
 		return service.transferClassroom(token, classroomId, newOwnerId);
 	}
 
 	// http://localhost:5000/user/addToClassroom
 	@PutMapping("addToClassroom")
-	public Map<String, Object> addToClassroom(@RequestHeader("Authorization") String token,
+	public ResponseEntity<Object>addToClassroom(@RequestHeader("Authorization") String token,
 			@RequestParam String classroomId, @RequestParam String email) {
 		return service.addToClassroom(token, classroomId, email);
 	}
 
 	// http://localhost:5000/user/leaveClassroom
 	@PutMapping("leaveClassroom")
-	public Map<String, Object> leaveClassroom(@RequestHeader("Authorization") String token,
+	public ResponseEntity<Object> leaveClassroom(@RequestHeader("Authorization") String token,
 			@RequestParam String classroomId) {
 		return service.leaveClassroom(token, classroomId);
 	}
 
 	// http://localhost:5000/user/removeUser
 	@PutMapping("removeUser")
-	public Map<String, Object> removeFromClassroom(@RequestHeader("Authorization") String token,
+	public ResponseEntity<Object> removeFromClassroom(@RequestHeader("Authorization") String token,
 			@RequestParam String classroomId, @RequestParam String userId) {
 		return service.removeFromClassroom(token, classroomId, userId);
 	}

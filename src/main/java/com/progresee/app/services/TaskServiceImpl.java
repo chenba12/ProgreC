@@ -1,6 +1,7 @@
 package com.progresee.app.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.google.api.core.ApiFuture;
@@ -67,8 +68,10 @@ public class TaskServiceImpl implements TaskService {
 				List<Task> tempTasks = documentSnapshot.toObjects(Task.class);
 				Map<String, Object> tasks = new Hashtable<>();
 				for (Task task : tempTasks) {
+					System.out.println(task);
 					tasks.put(task.getUid(), task);
 				}
+				System.out.println(tasks.size());
 				if (!tasks.isEmpty()) {
 					return tasks;
 				}
@@ -77,7 +80,7 @@ public class TaskServiceImpl implements TaskService {
 			e.printStackTrace();
 		}
 		response.setStatus(ResponseUtils.BAD_REQUEST);
-		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM,
+		return ResponseUtils.generateErrorCodePlural(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM,
 				"/getAllTasks");
 	}
 
@@ -88,13 +91,16 @@ public class TaskServiceImpl implements TaskService {
 			QuerySnapshot documentSnapshot = documentReference.get();
 			List<Task> tempTasks = documentSnapshot.toObjects(Task.class);
 			Map<String, Exercise> tempExercises = new HashMap<>();
-			if (!tempTasks.isEmpty()) {
+			if (tempTasks!=null) {
 				System.out.println(tempTasks+" NOT EMPTY");
 				for (Task task : tempTasks) {
 					tempExercises = exerciseService.getAllExercisesForUserAddedWrongly(task.getUid());
 					System.out.println(tempExercises+" THIS IS TEMP");
-					for (Exercise exercise : tempExercises.values()) {
-						exerciseService.initFinishedUsersList(classroomId, exercise.getUid());
+					if (tempExercises!=null) {
+						System.out.println(tempExercises);
+						for (Exercise exercise : tempExercises.values()) {
+							exerciseService.initFinishedUsersList(classroomId, exercise.getUid());
+						}
 					}
 				}
 			}
@@ -103,8 +109,9 @@ public class TaskServiceImpl implements TaskService {
 		}
 	}
 
+	// TODO: change return type
 	@Override
-	public Map<String, Object> getTask(String token, String classroomId, String taskId) {
+	public ResponseEntity<Object> getTask(String token, String classroomId, String taskId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
@@ -114,7 +121,7 @@ public class TaskServiceImpl implements TaskService {
 				ApiFuture<DocumentSnapshot> documentReference = docRef.get();
 				DocumentSnapshot documentSnapshot = documentReference.get();
 				if (documentSnapshot.exists()) {
-					return documentSnapshot.getData();
+					return ResponseEntity.ok(documentSnapshot.getData());
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
@@ -126,7 +133,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
-	public Map<String, Object> createTask(String token, String classroomId, String title, String description,
+	public ResponseEntity<Object> createTask(String token, String classroomId, String title, String description,
 			String link, String endDate) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
@@ -175,7 +182,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
-	public Map<String, Object> deleteTask(String token, String classroomId, String taskId) {
+	public ResponseEntity<Object> deleteTask(String token, String classroomId, String taskId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
@@ -209,7 +216,7 @@ public class TaskServiceImpl implements TaskService {
 		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.OWNER, "/deleteTask");
 	}
 
-	public Map<String, Object> archiveTaskFromClassrrom(String classroomId, String taskId) {
+	public ResponseEntity<Object> archiveTaskFromClassrrom(String classroomId, String taskId) {
 		ApiFuture<WriteResult> docRef = firestore.collection(TASKS).document(taskId).update("archived", true);
 		try {
 			DocumentReference getRef = firestore.collection(TASKS).document(taskId);
@@ -239,7 +246,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
-	public Map<String, Object> updateTask(String token, String classroomId, Task task) {
+	public ResponseEntity<Object> updateTask(String token, String classroomId, Task task) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
@@ -259,15 +266,13 @@ public class TaskServiceImpl implements TaskService {
 
 	}
 
-	private Map<String, Object> getTaskAfterRequest(String classroomId, String taskId) {
+	private ResponseEntity<Object> getTaskAfterRequest(String classroomId, String taskId) {
 		DocumentReference docRef = firestore.collection(TASKS).document(taskId);
 		try {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
 			DocumentSnapshot documentSnapshot = documentReference.get();
 			Task task = documentSnapshot.toObject(Task.class);
-			Map<String, Object> map = new HashMap<>();
-			map.put(taskId, task);
-			return map;
+			return ResponseEntity.ok(task);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

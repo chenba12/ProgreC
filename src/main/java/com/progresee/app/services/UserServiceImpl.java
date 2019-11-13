@@ -136,25 +136,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Map<String, Object> updateUser(String token, User user) {
-		Map<String, Object> map = findCurrentUser(token);
-		System.out.println("map -> " + map);
-		String uid = (String) map.get("uid");
-		ApiFuture<WriteResult> docRef = firestore.collection(USERS).document(uid).set(user);
-		try {
-			WriteResult writeResult = docRef.get();
-			if (writeResult != null) {
-				return getUserAfterRequest(uid);
-			}
-
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> getClassroom(String token, String classroomId) {
+	public ResponseEntity<Object> getClassroom(String token, String classroomId) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
@@ -164,7 +146,7 @@ public class UserServiceImpl implements UserService {
 			DocumentSnapshot documentSnapshot = documentReference.get();
 			Map<String, String> users = (Map<String, String>) documentSnapshot.get("userList");
 			if (users.containsKey(uid)) {
-				return documentSnapshot.getData();
+				return ResponseEntity.ok(documentSnapshot.getData());
 			}
 			response.setStatus(ResponseUtils.BAD_REQUEST);
 			return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM,
@@ -180,7 +162,7 @@ public class UserServiceImpl implements UserService {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
-		Query docRef = firestore.collection(CLASSROOMS);
+		Query docRef = firestore.collection(CLASSROOMS).whereEqualTo("archived", false);
 		try {
 			ApiFuture<QuerySnapshot> documentReference = docRef.get();
 			QuerySnapshot documentSnapshot = documentReference.get();
@@ -190,7 +172,6 @@ public class UserServiceImpl implements UserService {
 				if (classroom.getUserList().containsKey(uid)) {
 					classrooms.put(classroom.getUid(), classroom);
 				}
-
 			}
 			if (!classrooms.isEmpty()) {
 				return classrooms;
@@ -199,13 +180,13 @@ public class UserServiceImpl implements UserService {
 			e.printStackTrace();
 		}
 		response.setStatus(ResponseUtils.BAD_REQUEST);
-		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM,
+		return ResponseUtils.generateErrorCodePlural(ResponseUtils.BAD_REQUEST, ResponseUtils.NOT_PART_OF_CLASSROOM,
 				"/getClassrooms");
 
 	}
 
 	@Override
-	public Map<String, Object> createClassroom(String token, String classroomName, String description) {
+	public ResponseEntity<Object> createClassroom(String token, String classroomName, String description) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
 		System.out.println(description);
@@ -237,7 +218,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Map<String, Object> updateClassroom(String token, String classroomId, String classroomName,
+	public ResponseEntity<Object> updateClassroom(String token, String classroomId, String classroomName,
 			String description) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
@@ -265,7 +246,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Map<String, Object> deleteClassroom(String token, String classroomId) {
+	public ResponseEntity<Object> deleteClassroom(String token, String classroomId) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
@@ -279,8 +260,6 @@ public class UserServiceImpl implements UserService {
 					ApiFuture<QuerySnapshot> archivedReference = archiveRef.get();
 					QuerySnapshot archivedSnapshot = archivedReference.get();
 					List<Task> tempTasks = archivedSnapshot.toObjects(Task.class);
-					Map<String, Object> tasks = new Hashtable<>();
-					System.out.println("tasks list doomed for archiving --> " + tasks);
 					for (Task task : tempTasks) {
 						System.out.println("task with uid " + task.getUid() + " archived");
 						taskServiceImpl.archiveTaskFromClassrrom(classroomId, task.getUid());
@@ -323,7 +302,7 @@ public class UserServiceImpl implements UserService {
 				return userMap;
 			}
 			response.setStatus(ResponseUtils.BAD_REQUEST);
-			return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, "Error", "/getUsersInClassroom");
+			return ResponseUtils.generateErrorCodePlural(ResponseUtils.BAD_REQUEST, "Error", "/getUsersInClassroom");
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
@@ -331,7 +310,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Map<String, Object> transferClassroom(String token, String classroomId, String newOwnerId) {
+	public ResponseEntity<Object> transferClassroom(String token, String classroomId, String newOwnerId) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
@@ -366,41 +345,41 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Map<String, Object> addToClassroom(String token, String classroomId, String email) {
+	public ResponseEntity<Object> addToClassroom(String token, String classroomId, String email) {
 		Map<String, Object> map = findCurrentUser(token);
 		Map<String, Object> valuesMap = new HashMap<>();
 		String uid = (String) map.get("uid");
-			Query query = firestore.collection(USERS).whereEqualTo("email", email);
-			try {
-				QuerySnapshot querySnapshot = query.get().get();
-				List<QueryDocumentSnapshot> list = querySnapshot.getDocuments();
-				if (list.size() > 0) {
-					QueryDocumentSnapshot user = list.get(0);
-					String userUid = (String) user.get("uid");
-					System.out.println(userUid + " uid");
-					Map<String, String> userList = new HashMap<>();
-					userList.put(userUid, email);
-					valuesMap.put("userList", userList);
-					valuesMap.put("numberOfUsers", FieldValue.increment(1));
-					ApiFuture<WriteResult> docRef = firestore.collection(CLASSROOMS).document(classroomId)
-							.set(valuesMap, SetOptions.merge());
-					WriteResult writeResult = docRef.get();
-					if (writeResult != null) {
-						taskServiceImpl.getAllTasksForUserAddedWrongly(classroomId, email);
-						return getClassroomAfterRequest(classroomId);
-					}
+		Query query = firestore.collection(USERS).whereEqualTo("email", email);
+		try {
+			QuerySnapshot querySnapshot = query.get().get();
+			List<QueryDocumentSnapshot> list = querySnapshot.getDocuments();
+			if (list.size() > 0) {
+				QueryDocumentSnapshot user = list.get(0);
+				String userUid = (String) user.get("uid");
+				System.out.println(userUid + " uid");
+				Map<String, String> userList = new HashMap<>();
+				userList.put(userUid, email);
+				valuesMap.put("userList", userList);
+				valuesMap.put("numberOfUsers", FieldValue.increment(1));
+				ApiFuture<WriteResult> docRef = firestore.collection(CLASSROOMS).document(classroomId).set(valuesMap,
+						SetOptions.merge());
+				WriteResult writeResult = docRef.get();
+				if (writeResult != null) {
+					taskServiceImpl.getAllTasksForUserAddedWrongly(classroomId, email);
+					return getClassroomAfterRequest(classroomId);
 				}
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
 			}
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
 
-		response.setStatus(ResponseUtils.FORBIDDEN);
-		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.OWNER, "/addToClassroom");
+		response.setStatus(ResponseUtils.BAD_REQUEST);
+		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.OWNER, "/addToClassroom");
 
 	}
 
 	@Override
-	public Map<String, Object> leaveClassroom(String token, String classroomId) {
+	public ResponseEntity<Object> leaveClassroom(String token, String classroomId) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
@@ -442,7 +421,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Map<String, Object> removeFromClassroom(String token, String classroomId, String userId) {
+	public ResponseEntity<Object> removeFromClassroom(String token, String classroomId, String userId) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
@@ -465,7 +444,6 @@ public class UserServiceImpl implements UserService {
 									.document(classroomId).update("numberOfUsers", FieldValue.increment(-1));
 							WriteResult writeNumberOfUsersResults = writeNumberOfUsers.get();
 							if (writeNumberOfUsersResults != null) {
-//								taskServiceImpl.getAllTasksForUserAddedWrongly(classroomId, newUserEmail);
 								return ResponseUtils.generateSuccessString("You left the classroom sucessfully");
 							}
 						}
@@ -481,16 +459,15 @@ public class UserServiceImpl implements UserService {
 				"/removeFromClassroom");
 	}
 
-	private Map<String, Object> getClassroomAfterRequest(String uid) {
+	private ResponseEntity<Object> getClassroomAfterRequest(String uid) {
 		DocumentReference docRef = firestore.collection(CLASSROOMS).document(uid);
 		try {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
 			DocumentSnapshot documentSnapshot = documentReference.get();
 			if (documentSnapshot.exists()) {
 				Classroom classroom = documentSnapshot.toObject(Classroom.class);
-				Map<String, Object> map = new HashMap<>();
-				map.put(uid, classroom);
-				return map;
+			
+				return ResponseEntity.ok(classroom);
 			}
 			response.setStatus(ResponseUtils.BAD_REQUEST);
 			return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, "Classroom not found", "");
@@ -500,20 +477,6 @@ public class UserServiceImpl implements UserService {
 		return null;
 	}
 
-	private Map<String, Object> getUserAfterRequest(String uid) {
-		DocumentReference docRef = firestore.collection(USERS).document(uid);
-		try {
-			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
-			DocumentSnapshot documentSnapshot = documentReference.get();
-			Classroom classroom = documentSnapshot.toObject(Classroom.class);
-			Map<String, Object> map = new HashMap<>();
-			map.put(uid, classroom);
-			return map;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 	private String findUserByUid(String newOwnerId) {
 		try {

@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.util.Value;
@@ -57,7 +58,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 	private static final String ADMIN3 = "kobi.shasha@gmail.com";
 
 	@Override
-	public Map<String, Object> getExercise(String token, String classroomId, String taskId, String exerciseId) {
+	public ResponseEntity<Object> getExercise(String token, String classroomId, String taskId, String exerciseId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
 		DocumentReference docRef = firestore.collection(EXERCISES).document(exerciseId);
@@ -65,7 +66,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
 			DocumentSnapshot documentSnapshot = documentReference.get();
 			if (documentSnapshot.exists()) {
-				return documentSnapshot.getData();
+				return ResponseEntity.ok(documentSnapshot.getData());
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
@@ -125,15 +126,18 @@ public class ExerciseServiceImpl implements ExerciseService {
 				finishedUsersToSave.put("finishedUsersList", finishedUsersTemp);
 				ApiFuture<WriteResult> write = firestore.collection(EXERCISES).document(exerciseId)
 						.set(finishedUsersToSave, SetOptions.merge());
-				WriteResult writeResult = write.get();
-				if (writeResult != null) {
-					return finishedUsersTemp;
+			
+			     write.get();
+			     if (finishedUsersTemp.size()>0) {
+			    	 return finishedUsersTemp;
 				}
+				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return null;
+		response.setStatus(ResponseUtils.BAD_REQUEST);
+		return ResponseUtils.generateErrorCodePlural(ResponseUtils.BAD_REQUEST, "No users finished the exercise yet...", "/getFinishedUsers");
 	}
 
 	public Map<String, Object> initFinishedUsersList(String classroomId, String exerciseId) {
@@ -166,7 +170,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 	public Map<String, Object> getAllExercises(String token, String classroomId, String taskId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
-		Query docRef = firestore.collection(EXERCISES).whereEqualTo("taskUid", taskId);
+		Query docRef = firestore.collection(EXERCISES).whereEqualTo("taskUid", taskId).whereEqualTo("archived", false);
 		try {
 			ApiFuture<QuerySnapshot> documentReference = docRef.get();
 			QuerySnapshot documentSnapshot = documentReference.get();
@@ -182,7 +186,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 			e.printStackTrace();
 		}
 		response.setStatus(ResponseUtils.BAD_REQUEST);
-		return ResponseUtils.generateErrorCode(ResponseUtils.BAD_REQUEST, ResponseUtils.NO_EXERCISES_AVAILABLE,
+		return ResponseUtils.generateErrorCodePlural(ResponseUtils.BAD_REQUEST, ResponseUtils.NO_EXERCISES_AVAILABLE,
 				"/getAllExercises");
 	}
 
@@ -207,7 +211,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 	}
 
 	@Override
-	public Map<String, Object> createExercise(String token, String classroomId, String taskId, String description) {
+	public ResponseEntity<Object> createExercise(String token, String classroomId, String taskId, String description) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		Map<String, Object> checkMap = new HashMap<>();
 		System.out.println("map -> " + map);
@@ -239,7 +243,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 	}
 
 	@Override
-	public Map<String, Object> deleteExercise(String token, String classroomId, String taskId, String exerciseId) {
+	public ResponseEntity<Object> deleteExercise(String token, String classroomId, String taskId, String exerciseId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
 		ApiFuture<WriteResult> docRef = firestore.collection(EXERCISES).document(exerciseId).update("archived", true);
@@ -255,7 +259,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.ERROR, "/deleteExercise");
 	}
 
-	public Map<String, Object> archiveExercisesFromTask(String exerciseId) {
+	public ResponseEntity<Object> archiveExercisesFromTask(String exerciseId) {
 		ApiFuture<WriteResult> docRef = firestore.collection(EXERCISES).document(exerciseId).update("archived", true);
 		try {
 			WriteResult writeResult = docRef.get();
@@ -270,7 +274,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 	}
 
 	@Override
-	public Map<String, Object> updateExercise(String token, String classroomId, String taskId, Exercise exercise) {
+	public ResponseEntity<Object> updateExercise(String token, String classroomId, String taskId, Exercise exercise) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		System.out.println("map -> " + map);
 		ApiFuture<WriteResult> docRef = firestore.collection(EXERCISES).document(exercise.getUid()).set(exercise);
@@ -287,7 +291,7 @@ public class ExerciseServiceImpl implements ExerciseService {
 	}
 
 	@Override
-	public Map<String, Object> updateStatus(String token, String classroomId, String exerciseId) {
+	public ResponseEntity<Object> updateStatus(String token, String classroomId, String exerciseId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		Map<String, Object> finishedUsersTemp = new HashMap<>();
 		Map<String, Object> finishedUsersList = new HashMap<>();
@@ -320,15 +324,13 @@ public class ExerciseServiceImpl implements ExerciseService {
 		return ResponseUtils.generateErrorCode(ResponseUtils.FORBIDDEN, ResponseUtils.ERROR, "/updateExercise");
 	}
 
-	private Map<String, Object> getExerciseAfterRequest(String exerciseId) {
+	private ResponseEntity<Object> getExerciseAfterRequest(String exerciseId) {
 		DocumentReference docRef = firestore.collection(EXERCISES).document(exerciseId);
 		try {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
 			DocumentSnapshot documentSnapshot = documentReference.get();
 			Exercise exercise = documentSnapshot.toObject(Exercise.class);
-			Map<String, Object> map = new HashMap<>();
-			map.put(exerciseId, exercise);
-			return map;
+			return ResponseEntity.ok(exercise);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

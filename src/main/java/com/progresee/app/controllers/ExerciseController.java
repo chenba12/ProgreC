@@ -2,6 +2,7 @@ package com.progresee.app.controllers;
 
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +28,7 @@ public class ExerciseController {
 
 	// http://localhost:5000/exercise/getExercise?{classroomId}?{taskId}?{exerciseId}
 	@GetMapping("/getExercise")
-	public Map<String, Object> getExercise(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId,
+	public ResponseEntity<Object> getExercise(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId,
 			@RequestParam String exerciseId) {
 		return exerciseService.getExercise(token,classroomId, taskId, exerciseId);
 	}
@@ -46,28 +47,28 @@ public class ExerciseController {
 
 	// http://localhost:5000/exercise/createExercise?{classroomId}/{taskId}
 	@PostMapping("/createExercise")
-	public Map<String, Object> createExercise(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId,
+	public ResponseEntity<Object> createExercise(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId,
 			@RequestParam String description) {
 		return exerciseService.createExercise(token,classroomId, taskId, description);
 	}
 
 	// http://localhost:5000/exercise/deleteExercise?{classroomId}/{taskId}/{exerciseId}
 	@DeleteMapping("/deleteExercise")
-	public Map<String, Object> deleteExercise(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId,
+	public ResponseEntity<Object> deleteExercise(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId,
 			@RequestParam String exerciseId) {
 		return exerciseService.deleteExercise(token,classroomId, taskId, exerciseId);
 	}
 
 	// http://localhost:5000/exercise/update?{classroomId}/{taskId}
 	@PutMapping("/updateExercise")
-	public Map<String, Object> updateExercise(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId,
+	public ResponseEntity<Object>updateExercise(@RequestHeader("Authorization") String token,@RequestParam String classroomId, @RequestParam String taskId,
 			@RequestBody Exercise exercise) {
 		return exerciseService.updateExercise(token,classroomId, taskId, exercise);
 	}
 
 	// http://localhost:5000/exercise/updateStatus?{classroomId}/{taskId}
 	@PutMapping("updateStatus")
-	public Map<String, Object> updateStatus(@RequestHeader("Authorization") String token,@RequestParam String classroomId,
+	public ResponseEntity<Object> updateStatus(@RequestHeader("Authorization") String token,@RequestParam String classroomId,
 			@RequestParam String exerciseId) {
 		return exerciseService.updateStatus(token,classroomId, exerciseId);
 	}

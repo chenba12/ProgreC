@@ -8,14 +8,6 @@ import com.progresee.app.beans.User;
 
 public class NullCheckerUtils {
 
-	public static boolean userNullChecker(User user) {
-		if (user.getEmail() != null && user.getFullName() != null) {
-			if (user.getEmail().trim() != "" && user.getFullName().trim() != "") {
-				return true;
-			}
-		}
-		return false;
-	}
 
 	public static boolean taskNullChecker(Task task) {
 		if (task.getTitle() != null && task.getDescription() != null && task.getEndDate() != null) {
