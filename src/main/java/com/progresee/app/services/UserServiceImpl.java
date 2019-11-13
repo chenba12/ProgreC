@@ -138,7 +138,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public ResponseEntity<Object> getClassroom(String token, String classroomId) {
 		Map<String, Object> map = findCurrentUser(token);
-		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		try {
 			DocumentReference docRef = firestore.collection(CLASSROOMS).document(classroomId);
@@ -188,7 +187,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public ResponseEntity<Object> createClassroom(String token, String classroomName, String description) {
 		Map<String, Object> map = findCurrentUser(token);
-		System.out.println("map -> " + map);
 		System.out.println(description);
 		String uid = (String) map.get("uid");
 		String owner = (String) map.get("email");
@@ -221,7 +219,6 @@ public class UserServiceImpl implements UserService {
 	public ResponseEntity<Object> updateClassroom(String token, String classroomId, String classroomName,
 			String description) {
 		Map<String, Object> map = findCurrentUser(token);
-		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		map.clear();
 		map.put("name", classroomName);
@@ -248,7 +245,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public ResponseEntity<Object> deleteClassroom(String token, String classroomId) {
 		Map<String, Object> map = findCurrentUser(token);
-		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (checkOwnerShip(classroomId, uid)) {
 			ApiFuture<WriteResult> docRef = firestore.collection(CLASSROOMS).document(classroomId).update("archived",
@@ -281,7 +277,6 @@ public class UserServiceImpl implements UserService {
 	public Map<String, Object> getUsersInClassroom(String token, String classroomId) {
 		Map<String, Object> map = findCurrentUser(token);
 		Map<String, Object> userMap = new HashMap<>();
-		System.out.println("map -> " + map);
 		DocumentReference docRef = firestore.collection(CLASSROOMS).document(classroomId);
 		try {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
@@ -381,7 +376,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public ResponseEntity<Object> leaveClassroom(String token, String classroomId) {
 		Map<String, Object> map = findCurrentUser(token);
-		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (checkIfUserIsPartOfClassroom(classroomId, uid)) {
 			try {
@@ -424,7 +418,6 @@ public class UserServiceImpl implements UserService {
 	public ResponseEntity<Object> removeFromClassroom(String token, String classroomId, String userId) {
 		Map<String, Object> map = findCurrentUser(token);
 		System.out.println("map -> " + map);
-		String uid = (String) map.get("uid");
 		if (checkIfUserIsPartOfClassroom(classroomId, userId)) {
 			try {
 				Map<String, Object> userList = new HashMap<>();
