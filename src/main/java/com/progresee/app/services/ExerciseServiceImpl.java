@@ -59,7 +59,6 @@ public class ExerciseServiceImpl implements ExerciseService {
 	@Override
 	public Map<String, Object> getExercise(String token, String classroomId, String taskId, String exerciseId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
-		System.out.println("map -> " + map);
 		DocumentReference docRef = firestore.collection(EXERCISES).document(exerciseId);
 		try {
 			ApiFuture<DocumentSnapshot> documentReference = docRef.get();
@@ -137,17 +136,14 @@ public class ExerciseServiceImpl implements ExerciseService {
 	}
 
 	public Map<String, Object> initFinishedUsersList(String classroomId, String exerciseId) {
-		System.out.println("we in");
 		Map<String, String> usersInClassroom = new HashMap<>();
 		Map<String, Object> finishedUsersTemp = new HashMap<>();
 		Map<String, Object> finishedUsersToSave = new HashMap<>();
 		usersInClassroom = userService.getUsersInClassroomNoToken(classroomId);
 		try {
-			System.out.println("usersInClassroom -> " + usersInClassroom);
 			for (String email : usersInClassroom.values()) {
 				finishedUsersTemp.put(email, "N/A");
 			}
-			System.out.println("finishedUsersTemp--->" + finishedUsersTemp);
 			finishedUsersToSave.put("finishedUsersList", finishedUsersTemp);
 			ApiFuture<WriteResult> write = firestore.collection(EXERCISES).document(exerciseId).set(finishedUsersToSave,
 					SetOptions.merge());
@@ -165,7 +161,6 @@ public class ExerciseServiceImpl implements ExerciseService {
 	@Override
 	public Map<String, Object> getAllExercises(String token, String classroomId, String taskId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
-		System.out.println("map -> " + map);
 		Query docRef = firestore.collection(EXERCISES).whereEqualTo("taskUid", taskId);
 		try {
 			ApiFuture<QuerySnapshot> documentReference = docRef.get();
@@ -210,7 +205,6 @@ public class ExerciseServiceImpl implements ExerciseService {
 	public Map<String, Object> createExercise(String token, String classroomId, String taskId, String description) {
 		Map<String, Object> map = userService.findCurrentUser(token);
 		Map<String, Object> checkMap = new HashMap<>();
-		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkOwnerShip(classroomId, uid)) {
 			Exercise exercise = new Exercise();
@@ -241,7 +235,6 @@ public class ExerciseServiceImpl implements ExerciseService {
 	@Override
 	public Map<String, Object> deleteExercise(String token, String classroomId, String taskId, String exerciseId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
-		System.out.println("map -> " + map);
 		ApiFuture<WriteResult> docRef = firestore.collection(EXERCISES).document(exerciseId).update("archived", true);
 		try {
 			WriteResult writeResult = docRef.get();
@@ -272,7 +265,6 @@ public class ExerciseServiceImpl implements ExerciseService {
 	@Override
 	public Map<String, Object> updateExercise(String token, String classroomId, String taskId, Exercise exercise) {
 		Map<String, Object> map = userService.findCurrentUser(token);
-		System.out.println("map -> " + map);
 		ApiFuture<WriteResult> docRef = firestore.collection(EXERCISES).document(exercise.getUid()).set(exercise);
 		try {
 			WriteResult writeResult = docRef.get();

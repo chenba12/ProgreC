@@ -57,7 +57,6 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public Map<String, Object> getAllTasks(String token, String classroomId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
-		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		try {
 			if (userService.checkIfUserIsPartOfClassroom(classroomId, uid)) {
@@ -106,7 +105,6 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public Map<String, Object> getTask(String token, String classroomId, String taskId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
-		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkIfUserIsPartOfClassroom(classroomId, uid)) {
 			DocumentReference docRef = firestore.collection(TASKS).document(taskId);
@@ -129,7 +127,6 @@ public class TaskServiceImpl implements TaskService {
 	public Map<String, Object> createTask(String token, String classroomId, String title, String description,
 			String link, String endDate) {
 		Map<String, Object> map = userService.findCurrentUser(token);
-		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkOwnerShip(classroomId, uid)) {
 			try {
@@ -177,7 +174,6 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public Map<String, Object> deleteTask(String token, String classroomId, String taskId) {
 		Map<String, Object> map = userService.findCurrentUser(token);
-		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkOwnerShip(classroomId, uid)) {
 			ApiFuture<WriteResult> docRef = firestore.collection(TASKS).document(taskId).update("archived", true);
@@ -241,7 +237,6 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public Map<String, Object> updateTask(String token, String classroomId, Task task) {
 		Map<String, Object> map = userService.findCurrentUser(token);
-		System.out.println("map -> " + map);
 		String uid = (String) map.get("uid");
 		if (userService.checkOwnerShip(classroomId, uid)) {
 			ApiFuture<WriteResult> docRef = firestore.collection(TASKS).document(task.getUid()).set(task);
