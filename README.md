@@ -1,5 +1,5 @@
 
-# ProgreSee-Server
+# ProgreC-Server
 
 
 This is a school project
@@ -7,7 +7,7 @@ By [Chen Ben Ami](https://github.com/ChenBenAmi) and [Sean Hed](https://github.c
 The main idea about this project is to include everything we have learnt in our studies
 and demo a real life development cycle (CircleCi for Continuous Integration, Trello for planning,AWS to save applications on the cloud and monitor them)
 
-ProgreSee application to monitor students' progress on the class assignments. 
+ProgreC application to monitor students' progress on the class assignments. 
 
 **This project includes-**
 
